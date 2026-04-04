@@ -1,6 +1,6 @@
 # Golden Flow Hedera Report -- Cross-Chain E2E Test
 
-> **Date**: 2026-04-04 19:05 UTC
+> **Date**: 2026-04-04 19:54 UTC
 > **Payment Chain**: Base Mainnet (chain 8453)
 > **Reputation Chain**: Hedera Testnet (chain 296)
 > **Facilitator**: https://facilitator.ultravioletadao.xyz
@@ -23,10 +23,11 @@ reputation where the identity lives (Hedera).
 
 | Operation | Chain | TX Hash | Explorer |
 |-----------|-------|---------|----------|
-| Escrow Lock | Base (8453) | `0xe2e802fd9d68700269...` | [BaseScan](https://basescan.org/tx/0xe2e802fd9d68700269ecd5d6dbf3b393ae791c9f03fa567484bce818ab765e9e) |
-| Payment Release | Base (8453) | `0x0a2390e8ee38be7d05...` | [BaseScan](https://basescan.org/tx/0x0a2390e8ee38be7d057d1a01f4b09213ed0fcd692e4d721910d41a8842d8e194) |
-| Agent->Worker Rating | Hedera Testnet (296) | `0xe2a6e701e072b9b4e0...` | [HashScan](https://hashscan.io/testnet/transaction/0xe2a6e701e072b9b4e0f22c009de92af3043c9b361a6568b97a1913cfe2bacf55) |
-| Worker->Agent Rating | Hedera Testnet (296) | `0xc8876dad47bed24284...` | [HashScan](https://hashscan.io/testnet/transaction/0xc8876dad47bed24284595d96aa3bfa4b196554674b836276f8ed448f07ab37e1) |
+| Escrow Lock | Base (8453) | `0x7c0fc1a4b69e8d1e89...` | [BaseScan](https://basescan.org/tx/0x7c0fc1a4b69e8d1e89641bc5e735f7b892f8e4f863fe8d37c435c4f33695c6b2) |
+| Payment Release | Base (8453) | `0x2d6ca373c4748a3c37...` | [BaseScan](https://basescan.org/tx/0x2d6ca373c4748a3c37c180f8c6637a0b51f22facddcfb7fd46d1e464d01df08b) |
+| Agent->Worker Rating | Hedera Testnet (296) | `0x9e6474208b70c14fb6...` | [HashScan](https://hashscan.io/testnet/transaction/0x9e6474208b70c14fb608de0e1a5ddeb8219d9a0ec2687ba6596e905db45893e5) |
+| Worker->Agent Rating | Hedera Testnet (296) | `0x78e2b71b4bc719de45...` | [HashScan](https://hashscan.io/testnet/transaction/0x78e2b71b4bc719de457f44f3e018ce799888454a54523294a43690f318f0d572) |
+| Merit Tip (0.01 HBAR) | Hedera Testnet (296) | `0x820ab464bef9e8f1c7...` | [HashScan](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c) |
 
 ---
 
@@ -34,13 +35,13 @@ reputation where the identity lives (Hedera).
 
 | Parameter | Value |
 |-----------|-------|
-| Task ID | `d6c6a1b5-fb21-4427-9c8f-e767cc6c82d2` |
+| Task ID | `c767b255-00bc-4de7-8638-f5d777440248` |
 | Bounty | $0.05 USDC |
 | Worker Net (87%) | $0.0435 USDC |
 | Payment Chain | Base Mainnet (chain 8453) |
 | Reputation Chain | Hedera Testnet (chain 296) |
 | Hedera Agent ID | #99 |
-| Facilitator HBAR | 2097.265209 |
+| Facilitator HBAR | 2096.513655 |
 | Identity Registry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | Reputation Registry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
 
@@ -80,6 +81,7 @@ sequenceDiagram
 | 3 | Worker Flow | **PASS** |
 | 4 | Approval + Payment (Base) | **PASS** |
 | 5 | Reputation (Hedera) | **PASS** |
+| 6 | Merit Tip (Hedera HBAR) | **PASS** |
 
 ---
 
@@ -88,8 +90,8 @@ sequenceDiagram
 | Metric | Value |
 |--------|-------|
 | Agent #99 | hedera-testnet |
-| Feedback Count | 19 |
-| Average Score | 88 |
+| Feedback Count | 25 |
+| Average Score | 87 |
 | Verify | [API](https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/99) |
 
 ---
@@ -100,15 +102,15 @@ sequenceDiagram
 
 | TX | Explorer |
 |----|----------|
-| Escrow | [0xe2e802fd9d6870...](https://basescan.org/tx/0xe2e802fd9d68700269ecd5d6dbf3b393ae791c9f03fa567484bce818ab765e9e) |
-| Payment | [0x0a2390e8ee38be...](https://basescan.org/tx/0x0a2390e8ee38be7d057d1a01f4b09213ed0fcd692e4d721910d41a8842d8e194) |
+| Escrow | [0x7c0fc1a4b69e8d...](https://basescan.org/tx/0x7c0fc1a4b69e8d1e89641bc5e735f7b892f8e4f863fe8d37c435c4f33695c6b2) |
+| Payment | [0x2d6ca373c4748a...](https://basescan.org/tx/0x2d6ca373c4748a3c37c180f8c6637a0b51f22facddcfb7fd46d1e464d01df08b) |
 
 ### Hedera Testnet (Reputation)
 
 | TX | Explorer |
 |----|----------|
-| Agent->Worker | [0xe2a6e701e072b9...](https://hashscan.io/testnet/transaction/0xe2a6e701e072b9b4e0f22c009de92af3043c9b361a6568b97a1913cfe2bacf55) |
-| Worker->Agent | [0xc8876dad47bed2...](https://hashscan.io/testnet/transaction/0xc8876dad47bed24284595d96aa3bfa4b196554674b836276f8ed448f07ab37e1) |
+| Agent->Worker | [0x9e6474208b70c1...](https://hashscan.io/testnet/transaction/0x9e6474208b70c14fb608de0e1a5ddeb8219d9a0ec2687ba6596e905db45893e5) |
+| Worker->Agent | [0x78e2b71b4bc719...](https://hashscan.io/testnet/transaction/0x78e2b71b4bc719de457f44f3e018ce799888454a54523294a43690f318f0d572) |
 
 ---
 

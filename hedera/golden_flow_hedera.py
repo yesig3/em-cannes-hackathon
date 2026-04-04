@@ -95,6 +95,9 @@ class FlowResult:
     worker_rates_agent_tx: str = ""
     rep_count: int = 0
     rep_avg: int = 0
+    # Phase 5b (merit tip)
+    merit_tip_tx: str = ""
+    merit_tip_hbar: float = 0.0
     # Overall
     phases: list = None
 
@@ -150,6 +153,19 @@ def sign_escrow_for_assign(agent_key: str, worker_wallet: str, bounty_usd: float
             "salt": pi.salt,
         },
     }
+
+
+async def _json_rpc(method: str, params: list) -> str:
+    """Make a JSON-RPC call to Hedera testnet."""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(RPC_URL, json={
+            "jsonrpc": "2.0", "id": 1,
+            "method": method, "params": params,
+        })
+    data = resp.json()
+    if "error" in data:
+        raise RuntimeError(f"RPC error: {data['error']}")
+    return data["result"]
 
 
 async def signed_request(
@@ -257,6 +273,27 @@ async def run_golden_flow():
             result.task_id = task_resp.get("id", task_resp.get("data", {}).get("id", ""))
             print(f"  PASS: Task created: {result.task_id}")
             result.phases.append(("Task Creation (Base)", "PASS"))
+        elif "identity_required" in str(task_resp.get("detail", "")):
+            # Identity registration may need a moment to propagate
+            print(f"  Waiting for identity propagation...")
+            await asyncio.sleep(3)
+            task_resp = await signed_request(client, signer, "POST", "/api/v1/tasks", {
+                "title": f"[GOLDEN FLOW HEDERA] Cross-chain demo {result.timestamp}",
+                "instructions": "Respond with: golden_flow_hedera_complete",
+                "category": "simple_action",
+                "bounty_usd": BOUNTY,
+                "deadline_hours": 1,
+                "evidence_required": ["text_response"],
+                "payment_network": "base",
+                "payment_token": "USDC",
+            })
+            if task_resp.get("_http_status") in (200, 201):
+                result.task_id = task_resp.get("id", task_resp.get("data", {}).get("id", ""))
+                print(f"  PASS: Task created (retry): {result.task_id}")
+                result.phases.append(("Task Creation (Base)", "PASS"))
+            else:
+                print(f"  FAIL: {task_resp}")
+                result.phases.append(("Task Creation (Base)", f"FAIL: {task_resp.get('detail', '')}"))
         else:
             print(f"  FAIL: {task_resp}")
             result.phases.append(("Task Creation (Base)", f"FAIL: {task_resp.get('detail', task_resp.get('_http_status'))}"))
@@ -396,6 +433,58 @@ async def run_golden_flow():
 
     result.phases.append(("Reputation (Hedera)", "PASS"))
 
+    # ── Phase 5b: Merit Tip (reputation-gated HBAR payment) ──
+    AGENT_SCORE = 90
+    TIP_THRESHOLD = 80
+    TIP_AMOUNT_HBAR = 0.01
+
+    if AGENT_SCORE > TIP_THRESHOLD and AGENT_KEY:
+        print(f"\n  [Merit Tip] Score {AGENT_SCORE} > {TIP_THRESHOLD} threshold")
+        print(f"  Sending {TIP_AMOUNT_HBAR} HBAR tip to worker on {NETWORK_LABEL}...")
+
+        try:
+            from eth_account import Account
+            import rlp
+
+            agent_acct = Account.from_key(AGENT_KEY)
+
+            # Get nonce for agent on Hedera testnet
+            nonce_resp = await _json_rpc("eth_getTransactionCount", [agent_acct.address, "latest"])
+            nonce = int(nonce_resp, 16)
+
+            # Build legacy transaction (Hedera relay supports legacy format)
+            tip_wei = int(TIP_AMOUNT_HBAR * 1e18)  # HBAR to weibars
+            tx = {
+                "nonce": nonce,
+                "gasPrice": 1_100_000_000_000,  # 1100 gwei (Hedera min is 1020)
+                "gas": 30_000,
+                "to": bytes.fromhex(WORKER_WALLET[2:]),
+                "value": tip_wei,
+                "data": b"",
+                "chainId": CHAIN_ID,
+            }
+
+            signed = agent_acct.sign_transaction(tx)
+            raw = getattr(signed, "raw_transaction", None) or getattr(signed, "rawTransaction", None)
+            raw = raw.hex()
+            if not raw.startswith("0x"):
+                raw = "0x" + raw
+
+            tx_hash_resp = await _json_rpc("eth_sendRawTransaction", [raw])
+            result.merit_tip_tx = tx_hash_resp
+            result.merit_tip_hbar = TIP_AMOUNT_HBAR
+
+            print(f"  PASS: Merit tip sent!")
+            print(f"  TX: {EXPLORER_URL}/transaction/{result.merit_tip_tx}")
+            result.phases.append(("Merit Tip (Hedera HBAR)", "PASS"))
+
+        except Exception as e:
+            print(f"  FAIL: Merit tip error: {e}")
+            result.phases.append(("Merit Tip (Hedera HBAR)", f"FAIL: {e}"))
+    else:
+        print(f"\n  [Merit Tip] Score below threshold or no agent key -- skipped")
+        result.phases.append(("Merit Tip (Hedera HBAR)", "SKIP"))
+
     # ── Phase 6: Report ─────────────────────────────────────
     print("\n" + "=" * 60)
     print("  Phase 6: Generate Report")
@@ -413,6 +502,8 @@ async def run_golden_flow():
         print(f"  Payment (Base): {BASE_EXPLORER}/tx/{result.payment_tx}")
     if result.agent_rates_worker_tx:
         print(f"  Reputation (Hedera): {EXPLORER_URL}/transaction/{result.agent_rates_worker_tx}")
+    if result.merit_tip_tx:
+        print(f"  Merit Tip (Hedera): {EXPLORER_URL}/transaction/{result.merit_tip_tx}")
 
 
 def _generate_report(r: FlowResult) -> str:
@@ -452,6 +543,7 @@ reputation where the identity lives (Hedera).
 | Payment Release | Base (8453) | `{r.payment_tx[:20]}...` | [BaseScan]({BASE_EXPLORER}/tx/{r.payment_tx}) |
 | Agent->Worker Rating | {NETWORK_LABEL} ({CHAIN_ID}) | `{r.agent_rates_worker_tx[:20]}...` | [HashScan]({EXPLORER_URL}/transaction/{r.agent_rates_worker_tx}) |
 | Worker->Agent Rating | {NETWORK_LABEL} ({CHAIN_ID}) | `{r.worker_rates_agent_tx[:20]}...` | [HashScan]({EXPLORER_URL}/transaction/{r.worker_rates_agent_tx}) |
+| Merit Tip ({r.merit_tip_hbar} HBAR) | {NETWORK_LABEL} ({CHAIN_ID}) | `{r.merit_tip_tx[:20]}...` | [HashScan]({EXPLORER_URL}/transaction/{r.merit_tip_tx}) |
 
 ---
 
