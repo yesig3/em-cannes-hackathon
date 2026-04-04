@@ -437,7 +437,7 @@ async def run_golden_flow():
     # Gate the tip by ACTUAL on-chain reputation (read from Hedera chain),
     # not by the score we just submitted. This is a real feedback loop:
     # on-chain reputation → payment decision.
-    TIP_THRESHOLD = 80
+    TIP_THRESHOLD = 55
     TIP_AMOUNT_HBAR = 0.01
     onchain_avg = result.rep_avg  # Read from get_reputation() above
 
