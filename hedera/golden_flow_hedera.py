@@ -98,6 +98,9 @@ class FlowResult:
     # Phase 5b (merit tip)
     merit_tip_tx: str = ""
     merit_tip_hbar: float = 0.0
+    # Phase 6 (HCS)
+    hcs_topic_id: str = ""
+    hcs_message_count: int = 0
     # Overall
     phases: list = None
 
@@ -206,6 +209,18 @@ async def run_golden_flow():
     print(f"API: {EM_API_URL}")
     print(f"Reputation chain: {NETWORK_LABEL}")
 
+    # Initialize HCS logger (Hedera-native event logging)
+    hcs = None
+    hcs_topic = None
+    try:
+        from hcs_logger import HCSLogger
+        hcs = HCSLogger()
+        hcs_topic = hcs.create_topic("Execution Market Golden Flow Events")
+        result.hcs_topic_id = hcs_topic
+        print(f"HCS Topic: {hcs_topic}")
+    except Exception as e:
+        print(f"HCS init failed (non-blocking): {e}")
+
     async with httpx.AsyncClient(timeout=30.0) as client:
 
         # ── Phase 1: Connectivity ───────────────────────────────
@@ -272,6 +287,8 @@ async def run_golden_flow():
         if task_resp.get("_http_status") in (200, 201):
             result.task_id = task_resp.get("id", task_resp.get("data", {}).get("id", ""))
             print(f"  PASS: Task created: {result.task_id}")
+            if hcs and hcs_topic:
+                hcs.log_event(hcs_topic, "task_created", {"task_id": result.task_id, "bounty_usd": BOUNTY, "chain": "base"})
             result.phases.append(("Task Creation (Base)", "PASS"))
         elif "identity_required" in str(task_resp.get("detail", "")):
             # Identity registration may need a moment to propagate
@@ -325,6 +342,8 @@ async def run_golden_flow():
             apply_data = apply_resp.json() if apply_resp.status_code != 204 else {}
             if apply_resp.status_code in (200, 201):
                 print(f"  Applied: OK")
+                if hcs and hcs_topic:
+                    hcs.log_event(hcs_topic, "worker_applied", {"executor_id": result.executor_id, "task_id": result.task_id})
             else:
                 print(f"  Applied: {apply_resp.status_code} — {apply_data.get('detail', apply_data)}")
 
@@ -334,6 +353,8 @@ async def run_golden_flow():
                 escrow_data = sign_escrow_for_assign(AGENT_KEY, WORKER_WALLET, BOUNTY)
                 result.escrow_tx = escrow_data["escrow_tx"]
                 print(f"  Escrow TX: {BASE_EXPLORER}/tx/{result.escrow_tx}")
+                if hcs and hcs_topic:
+                    hcs.log_event(hcs_topic, "escrow_locked", {"tx": result.escrow_tx, "chain": "base", "amount_usd": BOUNTY})
             except Exception as e:
                 print(f"  Escrow signing failed: {e}")
                 result.phases.append(("Worker Flow", f"FAIL: escrow: {e}"))
@@ -390,6 +411,8 @@ async def run_golden_flow():
             print(f"  Approved: {approve_resp.get('_http_status')}")
             if result.payment_tx:
                 print(f"  Payment TX: {BASE_EXPLORER}/tx/{result.payment_tx}")
+                if hcs and hcs_topic:
+                    hcs.log_event(hcs_topic, "payment_released", {"tx": result.payment_tx, "chain": "base", "amount_usd": BOUNTY})
             result.phases.append(("Approval + Payment (Base)", "PASS"))
         else:
             print("  SKIP: No submission_id")
@@ -414,6 +437,8 @@ async def run_golden_flow():
     if result.agent_rates_worker_tx:
         print(f"  Agent->Worker: PASS")
         print(f"  TX: {EXPLORER_URL}/transaction/{result.agent_rates_worker_tx}")
+        if hcs and hcs_topic:
+            hcs.log_event(hcs_topic, "reputation_agent_to_worker", {"agent_id": HEDERA_AGENT_ID, "score": 90, "tx": result.agent_rates_worker_tx})
 
     # Worker rates agent
     fb2 = await submit_feedback(
@@ -424,6 +449,8 @@ async def run_golden_flow():
     if result.worker_rates_agent_tx:
         print(f"  Worker->Agent: PASS")
         print(f"  TX: {EXPLORER_URL}/transaction/{result.worker_rates_agent_tx}")
+        if hcs and hcs_topic:
+            hcs.log_event(hcs_topic, "reputation_worker_to_agent", {"agent_id": HEDERA_AGENT_ID, "score": 85, "tx": result.worker_rates_agent_tx})
 
     rep = await get_reputation(HEDERA_AGENT_ID, include_feedback=True)
     summary = rep.get("summary", {})
@@ -480,6 +507,8 @@ async def run_golden_flow():
 
             print(f"  PASS: Merit tip sent!")
             print(f"  TX: {EXPLORER_URL}/transaction/{result.merit_tip_tx}")
+            if hcs and hcs_topic:
+                hcs.log_event(hcs_topic, "merit_tip_sent", {"amount_hbar": TIP_AMOUNT_HBAR, "tx": result.merit_tip_tx, "worker": WORKER_WALLET})
             result.phases.append(("Merit Tip (Hedera HBAR)", "PASS"))
 
         except Exception as e:
@@ -489,9 +518,31 @@ async def run_golden_flow():
         print(f"\n  [Merit Tip] On-chain avg={onchain_avg} <= {TIP_THRESHOLD} -- no tip earned")
         result.phases.append(("Merit Tip (Hedera HBAR)", "SKIP"))
 
-    # ── Phase 6: Report ─────────────────────────────────────
+    # ── Phase 6: HCS Verification ──────────────────────────
+    if hcs and hcs_topic:
+        print("\n" + "=" * 60)
+        print("  Phase 6: HCS Event Log Verification")
+        print("=" * 60)
+        print(f"  Topic: {hcs_topic}")
+        print(f"  Mirror Node: {hcs.mirror_url}/api/v1/topics/{hcs_topic}/messages")
+        print(f"  Waiting for message propagation...")
+
+        messages = await hcs.get_messages(hcs_topic, expected_count=4, max_retries=5, retry_delay=3.0)
+        result.hcs_message_count = len(messages)
+        print(f"  Messages found: {result.hcs_message_count}")
+        for msg in messages:
+            print(f"    [{msg.get('_sequence', '?')}] {msg.get('type', '?')}")
+
+        if result.hcs_message_count >= 4:
+            result.phases.append(("HCS Event Log (Hedera Native)", "PASS"))
+        else:
+            result.phases.append(("HCS Event Log (Hedera Native)", f"PARTIAL ({result.hcs_message_count} msgs)"))
+    else:
+        result.phases.append(("HCS Event Log (Hedera Native)", "SKIP"))
+
+    # ── Phase 7: Report ─────────────────────────────────────
     print("\n" + "=" * 60)
-    print("  Phase 6: Generate Report")
+    print("  Phase 7: Generate Report")
     print("=" * 60)
 
     report = _generate_report(result)
