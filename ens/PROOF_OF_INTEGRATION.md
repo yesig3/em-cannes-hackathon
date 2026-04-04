@@ -1,7 +1,8 @@
 # ENS Integration — Proof of On-Chain Operations
 
-> All operations executed on **Ethereum Mainnet (chain 1)** on April 4, 2026.
-> Read-only — zero gas cost.
+> **Domain**: `execution-market.eth` — registered on Ethereum Mainnet, April 4, 2026.
+> **Owner**: `0x2A840A562E7359621eb9BBD83168101c3c5D4498`
+> **Production**: [execution.market](https://execution.market) — ENS integrated into the live app.
 
 ---
 
@@ -29,50 +30,54 @@ AI agents need **discoverable, human-readable identities** — not just wallet a
 
 | Step | Operation | Result | On-Chain |
 |------|-----------|--------|----------|
-| 1 | RPC Connectivity | PASS (block 24,807,567) | Chain ID 1 verified |
-| 2 | Forward Resolution | 3/3 names resolved | vitalik.eth, nick.eth, brantly.eth |
-| 3 | Reverse Resolution | No reverse record for EM wallet | Normal — reverse records are optional |
-| 4 | Text Records | 5 records read from vitalik.eth | url, description, avatar, twitter, github |
-| 5 | EM Metadata Schema | 12 records designed | com.execution.market.* prefix |
-| 6 | Worker Subnames | 4 subnames proposed | alice/bob/oracle/platform.execution.eth |
-| 7 | Cross-Reference | ENS + ERC-8004 + World ID | Multi-layer identity architecture |
+| 1 | Forward Resolution | PASS | `execution-market.eth` -> `0x2A840A...` |
+| 2 | Reverse Resolution | PASS | `0x2A840A...` -> `execution-market.eth` |
+| 3 | Text Records (standard) | 4 records | url, description, avatar, com.twitter |
+| 4 | Text Records (EM custom) | 3 records | agentId=2106, role=platform, chains=9 |
+| 5 | Primary Name | PASS | `setName` TX confirmed on L1 |
+| 6 | Production Integration | LIVE | ENS badges in execution.market dashboard |
 
 ---
 
-## On-Chain Evidence
+## On-Chain Evidence — execution-market.eth (OUR DOMAIN)
 
-### ENS Resolution — vitalik.eth
+### Forward Resolution
 
 ```
-Name:        vitalik.eth
-Address:     0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+Name:        execution-market.eth
+Address:     0x2A840A562E7359621eb9BBD83168101c3c5D4498
 Network:     Ethereum Mainnet (chain 1)
-ENS App:     https://app.ens.domains/vitalik.eth
-Etherscan:   https://etherscan.io/address/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+ENS App:     https://app.ens.domains/execution-market.eth
+Etherscan:   https://etherscan.io/address/0x2A840A562E7359621eb9BBD83168101c3c5D4498
 ```
 
-### Text Records — vitalik.eth
+### Reverse Resolution (Primary Name)
 
 ```
-url:          https://vitalik.ca
-description:  mi pinxe lo crino tcati
-avatar:       https://euc.li/vitalik.eth
-com.twitter:  VitalikButerin
-com.github:   vbuterin
+Address:     0x2A840A562E7359621eb9BBD83168101c3c5D4498
+Resolves to: execution-market.eth
+Method:      setName() on ENS Reverse Registrar
+TX:          Confirmed on Ethereum L1 (April 4, 2026)
 ```
 
-### ENS Resolution — nick.eth
+### Text Records — execution-market.eth
 
 ```
-Name:        nick.eth
-Address:     0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5
+url:                                https://execution.market
+description:                        Universal Execution Layer — AI agents publish bounties, humans execute them
+avatar:                             https://euc.li/execution-market.eth
+com.twitter:                        executi0nmarket
+com.execution.market.agentId:       2106
+com.execution.market.role:          platform
+com.execution.market.chains:        base,ethereum,polygon,arbitrum,hedera,avalanche,optimism,celo,monad
 ```
 
-### ENS Resolution — brantly.eth
+### Additional Verified Names (demo proof)
 
 ```
-Name:        brantly.eth
-Address:     0x983110309620D911731Ac0932219af06091b6744
+vitalik.eth  -> 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045  (5 text records)
+nick.eth     -> 0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5
+brantly.eth  -> 0x983110309620D911731Ac0932219af06091b6744
 ```
 
 ---
@@ -195,26 +200,118 @@ Management: NameWrapper (ERC-1155) — parent owner controls subnames.
 
 ---
 
-## Reproducing the Test
+## Production Integration — Where to See It
+
+ENS is integrated into the **live production app** at [execution.market](https://execution.market):
+
+### Backend (Python FastAPI)
+
+| Component | Location | What it does |
+|-----------|----------|-------------|
+| ENS client | `mcp_server/integrations/ens/client.py` | Resolution, text records, subname creation |
+| API router | `mcp_server/api/routers/ens.py` | 5 REST endpoints under `/api/v1/ens/` |
+| Auto-resolve | `mcp_server/api/routers/workers.py` | Fire-and-forget ENS lookup on worker registration |
+| DB migration | `supabase/migrations/087_ens_integration.sql` | `ens_name`, `ens_avatar`, `ens_subname` columns |
+
+**API Endpoints** (live at `api.execution.market`):
 
 ```bash
-# Clone and run
+# Resolve any ENS name
+curl https://api.execution.market/api/v1/ens/resolve/execution-market.eth
+
+# Read text records
+curl https://api.execution.market/api/v1/ens/records/execution-market.eth
+
+# Resolve a worker subname
+curl https://api.execution.market/api/v1/ens/subname/alice.execution-market.eth
+```
+
+### Frontend (React + TypeScript)
+
+| Component | Location | What it does |
+|-----------|----------|-------------|
+| `ENSBadge.tsx` | `dashboard/src/components/agents/` | Indigo badge showing ENS name |
+| `ENSLinkSection.tsx` | `dashboard/src/components/` | Profile page: detect ENS + claim subname |
+| `ens.ts` | `dashboard/src/services/` | API client for ENS endpoints |
+
+**Where ENS badges appear in the dashboard:**
+
+- **Task listings** — every agent/worker card shows ENS name badge
+- **Task detail** — agent profile card with ENS badge
+- **Application modal** — worker preview when applying to tasks
+- **Profile page** — "ENS Identity" section with detect + claim subname
+- **Public profiles** — ENS name displayed next to wallet
+
+### How It Works for Users
+
+```
+User connects wallet to execution.market
+    |
+    +-- Backend auto-resolves ENS name (fire-and-forget)
+    |   Uses reverse resolution: wallet -> ENS name
+    |
+    +-- If wallet has ENS (e.g., alice.eth):
+    |   ENS badge appears EVERYWHERE automatically
+    |   No action needed from user
+    |
+    +-- If wallet has NO ENS:
+    |   Profile page shows "Claim your execution-market.eth subname"
+    |   User types label -> clicks Claim -> on-chain TX
+    |   alice.execution-market.eth created via NameWrapper
+    |
+    +-- Both ENS name AND subname can coexist
+        alice.eth (personal) + alice.execution-market.eth (platform)
+```
+
+---
+
+## Reproducing the Demo
+
+```bash
+# Clone and run standalone demo
 git clone https://github.com/UltravioletaDAO/em-cannes-hackathon.git
 cd em-cannes-hackathon/ens
 pip install -r requirements.txt
 python demo.py
 
 # Expected output:
-# [1/7] Verifying Ethereum RPC connectivity...     PASS (block ~24M)
-# [2/7] Resolving ENS names...                     3/3 resolved
-# [3/7] Reverse-resolving addresses...             no reverse record
-# [4/7] Reading ENS text records...                5 records from vitalik.eth
-# [5/7] Execution Market proposed ENS records...   12 records designed
-# [6/7] Proposed worker subname fleet...           4 subnames
-# [7/7] ENS + ERC-8004 cross-reference...          Multi-layer architecture
+# [1/7] Verifying Ethereum RPC...              PASS (chain 1)
+# [2/7] Resolving ENS names...                 3/3 resolved (including execution-market.eth)
+# [3/7] Reverse-resolving...                   execution-market.eth PASS
+# [4/7] Reading text records...                7 records from execution-market.eth
+# [5/7] EM metadata...                         agentId=2106, role=platform, chains=9
+# [6/7] Worker subname fleet...                4 proposed
+# [7/7] Cross-reference...                     ENS + ERC-8004 + World ID
 
 # Run tests (24 cases)
 cd .. && python -m pytest ens/tests/test_ens.py -v -p no:pytest_ethereum
+```
+
+## Production Source Code
+
+The full integration source code is in the [Execution Market monorepo](https://github.com/UltravioletaDAO/execution-market):
+
+```
+execution-market/
+├── mcp_server/
+│   ├── integrations/ens/
+│   │   ├── __init__.py
+│   │   └── client.py              # ENS resolution + subname creation
+│   └── api/routers/
+│       └── ens.py                  # 5 REST API endpoints
+├── dashboard/src/
+│   ├── components/agents/
+│   │   └── ENSBadge.tsx            # Badge component (indigo diamond)
+│   ├── components/
+│   │   └── ENSLinkSection.tsx      # Profile: detect + claim subname
+│   ├── services/
+│   │   └── ens.ts                  # API client
+│   └── types/
+│       └── database.ts             # Executor type with ENS fields
+├── supabase/migrations/
+│   └── 087_ens_integration.sql     # DB schema
+└── infrastructure/terraform/
+    └── ecs.tf                      # ENS_OWNER_PRIVATE_KEY in ECS
 ```
 
 ---
