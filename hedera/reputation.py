@@ -59,7 +59,7 @@ async def submit_feedback(
             FACILITATOR_NETWORK,
             agent_id,
             value,
-            data.get("txHash", "")[:20],
+            data.get("transaction", data.get("txHash", ""))[:20],
         )
     else:
         logger.error(
