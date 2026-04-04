@@ -1,92 +1,136 @@
-# ENS Track -- Guia para Presentadores
+# Booth de ENS -- Guion para Yesi y David
 
-> Para Yesi y David en el booth de ENS, ETHGlobal Cannes 2026.
-> Lean esto en el celular antes de acercarse al booth.
-
----
-
-## Tracks a los que Aplicamos (ENS — $10,000 total)
-
-| Track | Premio | Requisito | Nuestras Features |
-|-------|-------:|-----------|-------------------|
-| **Best ENS Integration for AI Agents** | $5K | "Usar ENS para nombrar agentes, resolver direcciones, guardar metadata en text records. No solo cosmetico." | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
-| **Most Creative Use of ENS** | $5K | Uso creativo y no obvio de ENS | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
-
-**Mensaje clave**: ENS es como otros protocolos nos ENCUENTRAN. No es cosmetico -- es un mecanismo de descubrimiento entre protocolos. Si nuestro servidor se cae, la identidad on-chain persiste.
+> Lean esto en el celular antes de acercarse al booth de ENS.
+> NO necesitan entender el codigo. Solo sigan este guion.
 
 ---
 
-## Que Decir (30 segundos)
+## Donde Estan
 
-"Execution Market es un marketplace en produccion donde agentes de IA publican tareas con recompensas y humanos las completan. Integramos ENS para que nuestro agente de IA sea encontrable por nombre -- execution-market.eth -- no solo una direccion de wallet aleatoria. Los workers pueden reclamar subnombres como alice.execution-market.eth. Toda la identidad vive on-chain, asi que cualquier protocolo puede encontrarnos sin usar nuestro API."
+Estan en el **booth de ENS**. Hay **dos tracks** aqui, y estamos aplicando a ambos:
 
----
-
-## Que Mostrar (paso a paso)
-
-**Tengan estas pestanas abiertas ANTES de la demo:**
-
-1. Pestana 1: https://execution.market (el marketplace en vivo)
-2. Pestana 2: https://api.execution.market/docs (documentacion del API)
-3. Pestana 3: https://app.ens.domains/execution-market.eth (nuestra pagina en ENS)
-
-**Pasos de la demo:**
-
-1. Mostrar Pestana 3 (ENS App). Decir: "Este es execution-market.eth -- nuestro dominio, registrado en Ethereum mainnet. No es testnet, no es un mock."
-2. Bajar en la pagina de ENS App para mostrar los text records. Decir: "Siete registros de texto on-chain: nuestra URL, descripcion, Twitter, ID de agente. Cualquier protocolo puede leer esto sin tocar nuestro API."
-3. Cambiar a Pestana 1 (dashboard). Mostrar una tarjeta de agente o worker con insignia ENS. Decir: "Si un worker tiene un nombre ENS, aparece automaticamente. Lo detectamos cuando conectan su wallet."
-4. Cambiar a Pestana 2 (Swagger). Buscar la seccion ENS. Ejecutar el endpoint `GET /api/v1/ens/resolve/execution-market.eth`. Mostrar el resultado. Decir: "Resolucion en vivo. No esta hardcodeado."
-5. Luego ejecutar `GET /api/v1/ens/resolve/vitalik.eth`. Decir: "Funciona con cualquier nombre ENS -- esto prueba que es resolucion real, no una respuesta falsa."
-6. Mostrar la pagina de Perfil en Pestana 1. Senalar la seccion "Claim Subname". Decir: "Los workers pueden reclamar alice.execution-market.eth. Nosotros pagamos el gas. Obtienen una identidad permanente on-chain bajo nuestra plataforma."
+| Track | Premio |
+|-------|--------|
+| **Best ENS Integration for AI Agents** | $5,000 |
+| **Most Creative Use of ENS** | $5,000 |
+| **Total posible** | **$10,000** |
 
 ---
 
-## Puntos Clave
+## Que Quieren Ver los Jueces
 
-- execution-market.eth es un dominio ENS real en Ethereum mainnet. Registrado, pagado, con 7 registros de texto on-chain.
-- ENS hace que nuestro agente de IA sea ENCONTRABLE. Antes de ENS, Agente 2106 era solo un numero. Ahora cualquiera puede buscar execution-market.eth y encontrar todo sobre nosotros.
-- Los workers obtienen subnombres (como alice.execution-market.eth). La plataforma paga el gas para que los workers no necesiten ETH.
-- Esto NO es cosmetico. Otros protocolos pueden resolver nuestro nombre, leer nuestros metadatos, encontrar nuestro ID de agente y verificar nuestra reputacion -- todo sin usar nuestro API. Si nuestro servidor se cae, la identidad persiste on-chain.
-- Tres capas funcionan juntas: ENS es como nos ENCUENTRAN. ERC-8004 es como CONFIAN en nosotros. World ID es como saben que los workers son HUMANOS.
-- Todo esta en produccion. Sin mocks, sin valores hardcodeados.
+**Best ENS Integration for AI Agents:** Quieren que ENS se use de forma real y significativa para agentes de IA -- no solo un nombre bonito. Quieren ver nombrado de agentes, resolucion de direcciones, metadata guardada en registros de texto. Tiene que servir un proposito.
+
+**Most Creative Use of ENS:** Algo no obvio. Algo que los haga decir "no habia pensado en usar ENS asi."
 
 ---
 
-## Preguntas que los Jueces Van a Hacer (y respuestas)
+## Que Construimos (Digan Esto)
+
+Esto es lo que construimos, en palabras simples:
+
+1. **Nuestro agente de IA tiene un nombre ENS: execution-market.eth.** En vez de ser identificado por una direccion de wallet larga y aleatoria, cualquiera puede buscar "execution-market.eth" y encontrarnos. Esta registrado en Ethereum mainnet -- no es una prueba, no es falso.
+
+2. **Guardamos la informacion de identidad del agente dentro del nombre ENS.** Hay 7 registros de texto on-chain: nuestra URL, descripcion, Twitter, numero de agente, blockchains soportadas, rol del agente, y si estamos verificados con World ID. Cualquier otra app o protocolo puede leer todo esto solo buscando nuestro nombre ENS. No necesitan nuestro API. No necesitan nuestro permiso.
+
+3. **Los trabajadores obtienen subnombres bajo nuestra plataforma.** Una trabajadora llamada Alice puede reclamar "alice.execution-market.eth" como su identidad permanente on-chain. Nosotros pagamos el gas -- los trabajadores no necesitan tener crypto para reclamar su nombre.
+
+4. **Esto es un mecanismo de descubrimiento, no una insignia cosmetica.** Si nuestro servidor se cae manana, la identidad on-chain persiste. Otros protocolos pueden seguir encontrandonos, leer nuestros metadatos y ver nuestro ID de agente -- todo desde el nombre ENS solamente.
+
+**La vision completa -- tres capas trabajando juntas:**
+- **ENS** es como nos ENCUENTRAN (nombre y metadatos)
+- **ERC-8004** es como CONFIAN en nosotros (identidad y reputacion)
+- **World ID** es como saben que los trabajadores son HUMANOS (verificacion biometrica)
+
+---
+
+## Como Hacer la Demo (Paso a Paso)
+
+Abran estas 3 pestanas ANTES de empezar a hablar.
+
+### Pestana 1 -- Nuestra Pagina de Dominio ENS
+**URL:** https://app.ens.domains/execution-market.eth
+
+Senalen la pantalla y digan:
+> "Este es execution-market.eth -- nuestro dominio, registrado en Ethereum mainnet. Registro real, dinero real, no es testnet."
+
+Bajen para mostrar los **registros de texto**. Senalenlos y digan:
+> "Ven estos registros? Siete datos guardados on-chain. Nuestra URL, nuestro Twitter, nuestro ID de agente, que blockchains soportamos. Cualquier app en el mundo puede leer esto solo buscando nuestro nombre ENS. No necesitan llamar a nuestro API. No necesitan nuestro permiso. Si nuestro servidor desaparece, esta informacion sigue aqui."
+
+### Pestana 2 -- El Marketplace en Vivo
+**URL:** https://execution.market
+
+Senalen el dashboard y digan:
+> "Este es nuestro marketplace en produccion. Agentes de IA publican tareas, humanos las completan, les pagan en USDC. En vivo en 9 blockchains."
+
+Si encuentran un perfil de trabajador o tarjeta de agente que muestre una **insignia ENS**, hagan clic y digan:
+> "Ven esto? Cuando un trabajador conecta su wallet, automaticamente verificamos si tiene un nombre ENS. Si lo tiene, aparece aqui. Resolucion real, no esta escrita a mano."
+
+Luego vayan a la **pagina de Perfil** y senalen la seccion **"Claim Subname"**. Digan:
+> "Los trabajadores pueden reclamar un subnombre bajo nuestra plataforma -- como alice.execution-market.eth. Nosotros pagamos el gas. Obtienen una identidad permanente on-chain. No les cuesta nada."
+
+### Pestana 3 -- Resolucion ENS en Vivo en el API
+**URL:** https://api.execution.market/docs
+
+Busquen la seccion ENS. Ejecuten el endpoint:
+`GET /api/v1/ens/resolve/execution-market.eth`
+
+Muestren el resultado y digan:
+> "Esto es resolucion en vivo. El API acaba de buscar nuestro nombre ENS en tiempo real y devolvio la direccion y los registros. No esta escrito a mano."
+
+Luego ejecuten:
+`GET /api/v1/ens/resolve/vitalik.eth`
+
+Muestren el resultado y digan:
+> "Funciona con cualquier nombre ENS. Aqui esta el de Vitalik. Esto prueba que es resolucion real, no una respuesta falsa."
+
+### Cierre
+
+> "Entonces ENS no es solo un nombre para nosotros. Es como otros protocolos descubren a nuestro agente. Es como los trabajadores obtienen identidades permanentes. Y funciona aunque nuestro servidor este completamente fuera de linea. Tres capas: ENS para encontrarnos, ERC-8004 para confiar en nosotros, World ID para verificar a los humanos."
+
+---
+
+## Si Preguntan... (Respuestas en Lenguaje Simple)
 
 **"execution-market.eth esta registrado de verdad?"**
-Si. Registrado en Ethereum mainnet. Pueden verificarlo ahora mismo en app.ens.domains/execution-market.eth.
+> "Si. Registrado en Ethereum mainnet. Pueden verificarlo ahora mismo -- esta en la pantalla. Pagamos por el registro y configuramos los 7 registros de texto."
 
 **"Es solo una insignia cosmetica?"**
-No. Los text records contienen nuestro ID de agente, chains soportadas y rol. Cualquier protocolo puede resolver el nombre, leer los registros y descubrir nuestra identidad sin nuestro API. Si nuestro backend se cae, la identidad on-chain persiste.
+> "No, y esto es importante. Los registros de texto contienen nuestro ID de agente, nuestras cadenas soportadas, nuestro rol. Cualquier protocolo puede buscar nuestro nombre y encontrar todo esto sin hablar con nuestro servidor. Si nuestro backend se cae, la identidad persiste on-chain. Es un mecanismo de descubrimiento real."
 
 **"Como funcionan los subnombres?"**
-Los workers hacen clic en un boton en su perfil, escogen un nombre, y nosotros lo creamos on-chain usando NameWrapper. Nosotros pagamos el gas -- como $0.15 por subnombre. Cada worker obtiene uno.
+> "Un trabajador va a su perfil, hace clic en un boton, escoge un nombre, y nosotros lo creamos on-chain. Nosotros pagamos el gas -- como 15 centavos por subnombre. El trabajador obtiene una identidad permanente on-chain bajo nuestra plataforma. Como alice.execution-market.eth."
 
-**"Quien paga por el dominio ENS y los subnombres?"**
-La plataforma paga todo. El registro del dominio, las actualizaciones de text records, el gas de los subnombres. Los workers nunca necesitan ETH.
+**"Quien paga por todo?"**
+> "Nosotros. El registro del dominio, las actualizaciones de registros de texto, el gas de los subnombres. Los trabajadores nunca necesitan tener ETH ni ninguna crypto. Costo cero para ellos."
 
 **"Que es ERC-8004?"**
-Nuestro sistema de identidad on-chain para agentes de IA. ENS guarda el ID del agente (2106) en un text record, que se conecta con ERC-8004 donde viven la identidad completa y la reputacion. ENS es la puerta de entrada, ERC-8004 es la identidad adentro.
+> "Es nuestro sistema de identidad para agentes de IA -- como un pasaporte. Nuestro agente es el numero 2106. ENS guarda ese ID de agente en un registro de texto, que se conecta con ERC-8004 donde viven la identidad completa y la reputacion. Piensen en ENS como la puerta de entrada y ERC-8004 como la habitacion adentro."
+
+**"Como es esto creativo?"**
+> "La mayoria de la gente usa ENS para nombres de wallet. Nosotros lo usamos como una capa de descubrimiento entre protocolos para agentes de IA. Cualquier protocolo puede encontrar a nuestro agente, leer sus metadatos y verificar su identidad -- todo desde un nombre ENS. Ademas los trabajadores obtienen subnombres como identidades permanentes. Asi no se usa ENS tipicamente."
 
 **Si preguntan algo que no saben:**
-"Excelente pregunta -- nuestro lider tecnico puede darles mas detalle sobre eso. Dejenme mostrarles otra cosa."
+> "Excelente pregunta. Nuestro lider tecnico puede darles todos los detalles -- dejenme mostrarles otra cosa mientras tanto."
 
 ---
 
 ## Que NO Decir
 
 - NO digan "solo registramos un dominio." Digan "construimos una capa completa de identidad y descubrimiento sobre ENS."
-- NO digan "es solo un nombre." Digan "es un mecanismo de descubrimiento entre protocolos."
-- NO intenten explicar namehash, EIP-137 o internos de NameWrapper. Solo digan "usamos el protocolo estandar de ENS."
-- NO digan "planeamos agregar subnombres." Digan "los subnombres estan en vivo -- los workers pueden reclamarlos ahora."
+- NO digan "es solo un nombre." Digan "es como otros protocolos encuentran y confian en nuestro agente."
+- NO intenten explicar namehash, EIP-137, NameWrapper, ni ningun detalle interno de ENS. Solo digan "usamos el protocolo estandar de ENS."
+- NO digan "planeamos agregar subnombres." Los subnombres estan en vivo. Los trabajadores pueden reclamarlos ahora.
+- NO digan "es un proyecto de hackathon." Digan "es un marketplace en produccion."
 
 ---
 
-## Referencia Rapida
+## Links para Tener Abiertos (Listos para Copiar y Pegar)
 
-- Produccion: https://execution.market
-- Documentacion del API: https://api.execution.market/docs
-- Dominio ENS: https://app.ens.domains/execution-market.eth
-- GitHub: https://github.com/UltravioletaDAO/em-cannes-hackathon
-- Contacto: @ExecutionMarket en X
+| Que | URL |
+|-----|-----|
+| Nuestra pagina de dominio ENS | https://app.ens.domains/execution-market.eth |
+| Marketplace en vivo | https://execution.market |
+| Documentacion del API | https://api.execution.market/docs |
+| Repositorio en GitHub | https://github.com/UltravioletaDAO/em-cannes-hackathon |
+| Contacto | @ExecutionMarket en X |
