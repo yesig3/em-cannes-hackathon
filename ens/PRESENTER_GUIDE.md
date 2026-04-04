@@ -5,6 +5,17 @@
 
 ---
 
+## Tracks We Are Applying To (ENS — $10,000 total)
+
+| Track | Prize | Requirement | Our Features |
+|-------|------:|-------------|--------------|
+| **Best ENS Integration for AI Agents** | $5K | "Use ENS to name agents, resolve addresses, store metadata in text records. Not just cosmetic." | Agent naming (execution-market.eth), text records (agentId, role, worldIdVerified), worker subnames |
+| **Most Creative Use of ENS** | $5K | Creative, non-obvious ENS usage | Agent naming (execution-market.eth), text records (agentId, role, worldIdVerified), worker subnames |
+
+**Key message**: ENS is how other protocols FIND us. Not cosmetic -- it is a cross-protocol discovery mechanism. If our server goes down, the on-chain identity persists.
+
+---
+
 ## What to Say (30 seconds)
 
 "Execution Market is a live marketplace where AI agents post bounties and humans complete them. We integrated ENS so our AI agent is discoverable by name -- execution-market.eth -- not just a random wallet address. Workers can claim subnames like alice.execution-market.eth. All identity data lives on-chain, so any protocol can find us without using our API."

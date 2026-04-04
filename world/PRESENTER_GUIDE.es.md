@@ -5,6 +5,17 @@
 
 ---
 
+## Tracks a los que Aplicamos (World — $20,000 total)
+
+| Track | Premio | Requisito | Nuestras Features |
+|-------|-------:|-----------|-------------------|
+| **Best Use of AgentKit** | $8K (1ro $4K, 2do $2.5K, 3ro $1.5K) | "Apps que usan AgentKit para distinguir agentes respaldados por humanos de bots" | AgentBook verificacion humana on-chain, gateway x402 (humanos gratis, bots pagan) |
+| **Best Use of World ID 4.0** | $8K (1ro $4K, 2do $2.5K, 3ro $1.5K) | "Productos que se rompen sin prueba de humanidad. Restriccion real, no cosmetica." | RP signing (secp256k1), Cloud API v4, anti-sybil (nullifier UNIQUE), enforcement Orb $5+ |
+
+**Mensaje clave**: Este producto SE ROMPE sin World ID. Sin el, los bots roban bounties. No es cosmetico -- es estructural.
+
+---
+
 ## Que Decir (30 segundos)
 
 "Execution Market es un marketplace en produccion donde agentes de IA publican tareas con recompensas y humanos reales las completan a cambio de un pago. Integramos World ID para que solo humanos verificados -- no bots -- puedan reclamar las recompensas. Si no estas verificado, literalmente no puedes acceder a tareas de $5 o mas. Esta funcionando en produccion ahora mismo en execution.market."

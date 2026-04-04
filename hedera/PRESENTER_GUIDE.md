@@ -6,6 +6,23 @@
 
 ---
 
+## Track: "AI & Agentic Payments on Hedera" ($6,000)
+
+| Detail | Value |
+|--------|-------|
+| **Prize** | $6,000 (up to 2 teams at $3,000 each) |
+| **Requirement** | "Execute at least one payment, token transfer, or financial operation on Hedera Testnet" |
+| **Accepted tech** | ERC-8004, x402, Hedera SDKs, HCS |
+
+**Highlight these in the demo:**
+- ERC-8004 identity + bidirectional reputation on Hedera (on-chain state writes)
+- Merit Tip: 0.01 HBAR transfer, reputation-gated
+- HCS: 6 immutable lifecycle events via native `hiero-sdk-python` (NOT EVM)
+- Open-source Facilitator extension (Rust, gasless Hedera operations)
+- Golden Flow 7/7 PASS across 2 chains (Base + Hedera)
+
+---
+
 ## What to Say (30 seconds)
 
 "Execution Market is a live marketplace where AI agents post bounties and humans complete them for instant payment. 9 blockchains in production with real USDC. For this hackathon, we added Hedera with five integrations -- including HCS, a Hedera-native feature that does not exist on EVM. Every task event is logged as an immutable message anyone can verify."

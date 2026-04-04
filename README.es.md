@@ -6,6 +6,21 @@
 
 ---
 
+## Tracks de Premios
+
+| Partner | Track | Premio | Nuestras Features |
+|---------|-------|-------:|-------------------|
+| **World** ($20K) | Best Use of AgentKit | $8K (1ro $4K, 2do $2.5K, 3ro $1.5K) | AgentBook verificacion humana on-chain, gateway x402 (humanos gratis, bots pagan) |
+| **World** ($20K) | Best Use of World ID 4.0 | $8K (1ro $4K, 2do $2.5K, 3ro $1.5K) | RP signing (secp256k1), Cloud API v4, anti-sybil (nullifier UNIQUE), enforcement Orb $5+ |
+| **World** ($20K) | World Mini App | $4K (1ro $2K, 2do $1.25K, 3ro $0.75K) | *(no aplicamos)* |
+| **Hedera** ($6K) | AI & Agentic Payments on Hedera | $6K (hasta 2 equipos a $3K) | Identidad ERC-8004 + reputacion, merit tip (0.01 HBAR), registro HCS (nativo), extension Facilitator (Rust open-source) |
+| **ENS** ($10K) | Best ENS Integration for AI Agents | $5K | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
+| **ENS** ($10K) | Most Creative Use of ENS | $5K | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
+
+**Pool total de premios al que apuntamos: $36K en 5 tracks de 3 partners.**
+
+---
+
 ## El Problema
 
 Los marketplaces IA-a-humano estan rotos: bots fabrican evidencia, atacantes sybil farmean recompensas, la identidad esta aislada por protocolo, y los pagos estan atrapados en una sola chain.
@@ -30,9 +45,9 @@ Agente aprueba --> pago se libera (x402, gasless)
 
 ---
 
-## Partner 1: World ($20K) — AgentKit + World ID 4.0
+## Partner 1: World ($20,000) — AgentKit + World ID 4.0
 
-### Track 1: Mejor Uso de AgentKit ($8K)
+### Track 1: "Best Use of AgentKit" ($8K — 1ro: $4K, 2do: $2.5K, 3ro: $1.5K)
 
 Verificacion humana on-chain via contrato AgentBook en Base:
 
@@ -46,7 +61,7 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 **Archivos**: `world/agentkit/` | **Tests**: 12 pasando
 
-### Track 2: Mejor Uso de World ID 4.0 ($8K)
+### Track 2: "Best Use of World ID 4.0" ($8K — 1ro: $4K, 2do: $2.5K, 3ro: $1.5K)
 
 **Este producto SE ROMPE sin World ID.** Sin el, los bots roban bounties. Con el:
 
@@ -61,9 +76,11 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 ---
 
-## Partner 2: Hedera ($15K) — IA y Pagos Agenticos
+## Partner 2: Hedera ($6,000) — IA y Pagos Agenticos
 
-### Que Construimos
+### Track: "AI & Agentic Payments on Hedera" ($6K — hasta 2 equipos a $3K cada uno)
+
+#### Que Construimos
 
 - **Extension Open-Source del Facilitator** — Extendimos [x402-rs](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) para Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
 - **Identidad ERC-8004 + Reputacion en Hedera** — Agente #99 registrado en Hedera testnet, reputacion bidireccional (gasless)
@@ -80,7 +97,9 @@ La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) son ideales para ide
 
 ---
 
-## Partner 3: ENS ($10K) — Identidad y Descubrimiento de Agentes
+## Partner 3: ENS ($10,000) — Identidad y Descubrimiento de Agentes
+
+### Tracks: "Best ENS Integration for AI Agents" ($5K) + "Most Creative Use of ENS" ($5K)
 
 - **Nombrado de agentes**: `execution-market.eth` resuelve al Agente #2106
 - **Metadata on-chain**: Text records ENS almacenan `agentId`, `worldIdVerified`, `role`, `reputation`

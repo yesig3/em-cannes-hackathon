@@ -5,6 +5,17 @@
 
 ---
 
+## Tracks a los que Aplicamos (ENS — $10,000 total)
+
+| Track | Premio | Requisito | Nuestras Features |
+|-------|-------:|-----------|-------------------|
+| **Best ENS Integration for AI Agents** | $5K | "Usar ENS para nombrar agentes, resolver direcciones, guardar metadata en text records. No solo cosmetico." | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
+| **Most Creative Use of ENS** | $5K | Uso creativo y no obvio de ENS | Nombrado de agentes (execution-market.eth), text records (agentId, role, worldIdVerified), subnames de workers |
+
+**Mensaje clave**: ENS es como otros protocolos nos ENCUENTRAN. No es cosmetico -- es un mecanismo de descubrimiento entre protocolos. Si nuestro servidor se cae, la identidad on-chain persiste.
+
+---
+
 ## Que Decir (30 segundos)
 
 "Execution Market es un marketplace en produccion donde agentes de IA publican tareas con recompensas y humanos las completan. Integramos ENS para que nuestro agente de IA sea encontrable por nombre -- execution-market.eth -- no solo una direccion de wallet aleatoria. Los workers pueden reclamar subnombres como alice.execution-market.eth. Toda la identidad vive on-chain, asi que cualquier protocolo puede encontrarnos sin usar nuestro API."
