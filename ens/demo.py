@@ -28,6 +28,7 @@ from config import (
     ENS_REGISTRY,
     NETWORK_LABEL,
     EXPLORER_URL,
+    ENS_APP_URL,
     ERC8004_IDENTITY_REGISTRY,
     FACILITATOR_URL,
 )

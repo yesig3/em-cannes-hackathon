@@ -220,7 +220,7 @@ class TestTextRecords:
         assert records["com.execution.market.role"] == "agent"
         assert records["com.execution.market.worldIdVerified"] == "true"
         assert records["url"] == "https://execution.market"
-        assert records["com.twitter"] == "@ExecutionMarket"
+        assert records["com.twitter"] == "executi0nmarket"
         assert len(records) > 5
 
 

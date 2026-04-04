@@ -14,12 +14,10 @@ from typing import Optional
 from web3 import Web3
 
 from config import (
-    RPC_URL,
     EM_TEXT_RECORDS,
     EM_TEXT_RECORD_PREFIX,
     NETWORK_LABEL,
     ERC8004_IDENTITY_REGISTRY,
-    FACILITATOR_URL,
 )
 from resolver import get_web3
 
@@ -176,7 +174,7 @@ def proposed_agent_records(
     world_id_level: str = "orb",
     reputation: float = 4.8,
     tasks_completed: int = 127,
-    chains: str = "base,ethereum,polygon,arbitrum,hedera",
+    chains: str = "base,ethereum,polygon,arbitrum,hedera,avalanche,optimism,celo,monad",
 ) -> dict:
     """
     Generate the proposed ENS text records for an Execution Market agent.
@@ -195,6 +193,6 @@ def proposed_agent_records(
         "url": "https://execution.market",
         "description": "Universal Execution Layer — AI agents publish bounties, verified humans execute them",
         "avatar": f"eip155:8453/erc721:{ERC8004_IDENTITY_REGISTRY}/{agent_id}",
-        "com.twitter": "@ExecutionMarket",
+        "com.twitter": "executi0nmarket",
         "com.github": "UltravioletaDAO",
     }

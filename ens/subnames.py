@@ -9,10 +9,9 @@ The parent domain owner can create subnames via NameWrapper.
 """
 
 import logging
-from typing import Optional
 
-from resolver import resolve_name, reverse_resolve, get_web3
-from text_records import get_text_record, namehash, get_em_metadata
+from resolver import resolve_name
+from text_records import get_em_metadata
 
 logger = logging.getLogger(__name__)
 
