@@ -72,8 +72,9 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 - **Extension Open-Source del Facilitator** — Extendimos el [Facilitator x402-rs](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) para soportar Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
 - **Identidad ERC-8004 + Reputacion en Hedera** — Agente #99 registrado en Hedera testnet, reputacion bidireccional (gasless via Facilitator)
-- **Merit Tip: Pago HBAR Gatekeado por Reputacion** — Workers con puntaje > 80 reciben 0.01 HBAR como recompensa de merito ([TX](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c))
-- **Golden Flow Cross-Chain (6/6 PASS)** — Ciclo completo: escrow en Base, reputacion + tips HBAR en Hedera, 5 TXs on-chain en 2 chains
+- **Merit Tip: Pago HBAR Gatekeado por Reputacion** — Workers con puntaje > 80 reciben 0.01 HBAR como recompensa de merito ([TX](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83))
+- **Registro Inmutable de Eventos HCS** — Usa Hedera Consensus Service nativo (NO EVM) via `hiero-sdk-python` para registrar los 6 eventos del ciclo de vida como mensajes inmutables y ordenados en [HCS Topic `0.0.8511371`](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages)
+- **Golden Flow Cross-Chain (7/7 PASS)** — Ciclo completo: escrow en Base, reputacion + tips HBAR + registro de eventos HCS en Hedera, 6 TXs on-chain + 6 mensajes HCS en 2 chains
 
 ### Por que Hedera
 
@@ -87,11 +88,11 @@ Hoy (Produccion):                 Agregando Hedera:
   ERC-8004 en 16 redes              ERC-8004 + Reputacion + Merit Tips
 ```
 
-La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) lo hacen ideal para infraestructura de identidad de agentes IA y micro-pagos. Hallazgo clave: USDC en Hedera es HTS nativo (no ERC-20), por lo que usamos transferencias directas de HBAR para la feature de merit tip.
+La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) lo hacen ideal para infraestructura de identidad de agentes IA y micro-pagos. Hallazgo clave: USDC en Hedera es HTS nativo (no ERC-20), por lo que usamos transferencias directas de HBAR para la feature de merit tip. HCS (Hedera Consensus Service) provee registro inmutable de eventos nativo de Hedera -- no accesible via EVM/JSON-RPC, demostrando integracion profunda con la plataforma mas alla de compatibilidad EVM generica.
 
 **Archivos**: `hedera/` | **Contratos**: ERC-8004 Identity `0x8004A818...` en Hedera testnet
 
-> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — 5 TX hashes, resultados del Golden Flow, arquitectura, detalles de la extension del Facilitator
+> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — 6 TX hashes + topic HCS, resultados del Golden Flow 7/7, arquitectura, detalles de la extension del Facilitator
 > **[Plan de Integracion](docs/HEDERA_INTEGRATION.md)** — arquitectura, FAQ, talking points para booth
 
 ---

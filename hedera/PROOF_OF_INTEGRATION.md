@@ -2,7 +2,7 @@
 
 > All operations executed on **Hedera Testnet (chain 296)** on April 3, 2026.
 > Gasless via [Ultravioleta Facilitator](https://facilitator.ultravioletadao.xyz).
-> Golden Flow: **6/6 PASS** — full lifecycle with cross-chain escrow (Base) + reputation (Hedera) + merit tip (HBAR).
+> Golden Flow: **7/7 PASS** — full lifecycle with cross-chain escrow (Base) + reputation (Hedera) + merit tip (HBAR) + HCS event logging (Hedera-native).
 
 ---
 
@@ -19,8 +19,8 @@ Hedera's sub-second finality, predictable fees (<$0.01), and native EVM compatib
 
 | Requirement | How We Meet It |
 |------------|----------------|
-| *"Execute at least one payment, token transfer, or financial operation on Hedera Testnet"* | **Three on-chain operations**: (1) ERC-8004 agent registration = NFT mint (token transfer), (2) bidirectional reputation feedback = on-chain state writes, (3) **0.01 HBAR merit tip** = direct HBAR transfer to worker as reputation reward. All executed via Facilitator, all verifiable on HashScan. |
-| *"Incorporate: Hedera Agent Kit, OpenClaw ACP, x402, A2A, or Hedera SDKs directly"* | **x402 protocol** (our payment stack, 9 chains in production) + **ERC-8004** (explicitly listed as accepted technology: "Trustless Agents") + **open-source Facilitator extension** adding Hedera support ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95)). |
+| *"Execute at least one payment, token transfer, or financial operation on Hedera Testnet"* | **Four on-chain operations**: (1) ERC-8004 agent registration = NFT mint (token transfer), (2) bidirectional reputation feedback = on-chain state writes, (3) **0.01 HBAR merit tip** = direct HBAR transfer to worker as reputation reward, (4) **HCS event logging** = 6 immutable consensus messages via Hedera-native TopicMessageSubmitTransaction. All executed via Facilitator + hiero-sdk-python, all verifiable on HashScan + Mirror Node. |
+| *"Incorporate: Hedera Agent Kit, OpenClaw ACP, x402, A2A, or Hedera SDKs directly"* | **x402 protocol** (our payment stack, 9 chains in production) + **ERC-8004** (explicitly listed as accepted technology: "Trustless Agents") + **hiero-sdk-python** (Hedera-native SDK for HCS TopicCreate + TopicMessageSubmit) + **open-source Facilitator extension** adding Hedera support ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95)). |
 | *"Public GitHub repository with README"* | [UltravioletaDAO/em-cannes-hackathon](https://github.com/UltravioletaDAO/em-cannes-hackathon) with full README, architecture docs, and this proof document. |
 | *"Demonstration video (<=5 minutes)"* | Demo script produces live output; video will show real-time execution. |
 
@@ -34,11 +34,13 @@ Our demo is **not theoretical**. It executes real on-chain operations — includ
 
 2. **Bidirectional Reputation Feedback** (ERC-8004 `giveFeedback`) — both agent-to-worker and worker-to-agent reputation scores written to the Reputation Registry on Hedera. These are on-chain financial operations that create verifiable trust signals.
 
-3. **Merit Tip: 0.01 HBAR** — when a worker receives a reputation score above 80, the agent sends a **direct HBAR transfer** as a merit tip. This is a real payment on Hedera testnet, gated by reputation quality. TX: [`0x820ab464...`](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c).
+3. **Merit Tip: 0.01 HBAR** — when a worker receives a reputation score above 80, the agent sends a **direct HBAR transfer** as a merit tip. This is a real payment on Hedera testnet, gated by reputation quality. TX: [`0x1c4ce9dc...`](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83).
 
-4. **Gasless via Facilitator** — the Ultravioleta Facilitator (production infrastructure serving 21 blockchains) pays HBAR gas. Agents don't need HBAR to operate on Hedera. This is the same model used on 9 other chains in production.
+4. **HCS Event Logging** (Hedera Consensus Service) — every lifecycle event (task created, worker applied, escrow locked, payment released, both reputation updates) is logged as an immutable message on HCS Topic `0.0.8511371`. This uses `hiero-sdk-python` with `TopicCreateTransaction` and `TopicMessageSubmitTransaction` — **Hedera-native APIs, NOT accessible via EVM/JSON-RPC**. Verifiable at the [Mirror Node](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages).
 
-5. **Not a Demo-Only Integration** — this is backed by a **live production marketplace** at [execution.market](https://execution.market) with real USDC payments. Hedera extends the identity layer to a 10th chain. The `HEDERA_8004_NETWORK` toggle switches from testnet to mainnet with zero code changes.
+5. **Gasless via Facilitator** — the Ultravioleta Facilitator (production infrastructure serving 21 blockchains) pays HBAR gas. Agents don't need HBAR to operate on Hedera. This is the same model used on 9 other chains in production.
+
+6. **Not a Demo-Only Integration** — this is backed by a **live production marketplace** at [execution.market](https://execution.market) with real USDC payments. Hedera extends the identity layer to a 10th chain. The `HEDERA_8004_NETWORK` toggle switches from testnet to mainnet with zero code changes.
 
 ### Accepted Technologies We Use
 
@@ -46,6 +48,8 @@ Our demo is **not theoretical**. It executes real on-chain operations — includ
 |-----------|--------|---------------|
 | **ERC-8004** (Trustless Agents) | Listed by Hedera as accepted | On-chain agent identity + bidirectional reputation on Hedera testnet |
 | **x402** (Payment Standard) | Listed by Hedera as accepted | Production payment protocol on 9 EVM chains (gasless escrow) |
+| **Hedera Consensus Service (HCS)** | Hedera-native (not EVM) | Immutable event logging — 6 lifecycle messages per task via TopicMessageSubmitTransaction |
+| **hiero-sdk-python** | Hedera-native SDK | HCS TopicCreateTransaction + TopicMessageSubmitTransaction (NOT accessible via JSON-RPC) |
 | **Hedera JSON-RPC Relay** | Via Hashio | Balance checks, chain verification, contract reads |
 | **Facilitator** (Infrastructure) | Production (21 blockchains) | Gasless operations — pays HBAR gas for all on-chain TXs |
 | **[x402-rs](https://github.com/UltravioletaDAO/x402-rs)** (Open-Source Contribution) | Extended for this hackathon | Rust Facilitator — added Hedera mainnet (295) + testnet (296) support ([commit](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95)) |
@@ -80,34 +84,81 @@ When a worker completes a task and receives a **reputation score above 80**, the
 
 This feature demonstrates that Hedera is not just used for identity — it is used for **agentic payments** where AI agents reward human performance based on on-chain reputation data.
 
-**TX**: [`0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c`](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c)
+**TX**: [`0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83`](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83)
 
 ---
 
-## Test Results Summary (Golden Flow — 6/6 PASS)
+## Hedera Consensus Service (HCS) — Native Event Logging
+
+**HCS is Hedera-NATIVE infrastructure** — it is NOT accessible via EVM or JSON-RPC. It uses `TopicCreateTransaction` and `TopicMessageSubmitTransaction` from `hiero-sdk-python`, the official Hedera SDK. This proves we use Hedera beyond generic EVM compatibility.
+
+Every task lifecycle event is logged as an immutable, timestamped, ordered message on an HCS topic. This creates a **tamper-proof audit trail** that any third party can verify via the Hedera Mirror Node — no trust in our platform required.
+
+### HCS Topic
+
+```
+Topic ID:     0.0.8511371
+Mirror Node:  https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages
+Network:      Hedera Testnet
+SDK:          hiero-sdk-python (TopicCreateTransaction + TopicMessageSubmitTransaction)
+```
+
+### Messages Logged (6 lifecycle events)
+
+| Seq # | Event Type | Description | Verifiable |
+|-------|-----------|-------------|------------|
+| 1 | `task_created` | Task published with bounty amount and deadline | Mirror Node |
+| 2 | `worker_applied` | Worker applied to task | Mirror Node |
+| 3 | `escrow_locked` | USDC escrow locked on Base (cross-chain reference) | Mirror Node + BaseScan |
+| 4 | `payment_released` | Payment released to worker on Base | Mirror Node + BaseScan |
+| 5 | `reputation_agent_to_worker` | Agent rated worker (score, on-chain TX hash) | Mirror Node + HashScan |
+| 6 | `reputation_worker_to_agent` | Worker rated agent (score, on-chain TX hash) | Mirror Node + HashScan |
+
+### Why HCS Matters
+
+- **Immutability**: Once submitted, messages cannot be altered or deleted
+- **Ordering**: Consensus timestamps guarantee event ordering across distributed systems
+- **Transparency**: Any party can query the Mirror Node REST API to audit the full task lifecycle
+- **Cross-chain anchoring**: HCS messages reference Base TX hashes, creating a verifiable link between chains
+- **Hedera-native**: Uses Hedera's unique consensus layer, not generic EVM — demonstrates deep platform integration
+
+### Verify It Yourself
+
+```bash
+# Query all messages for this task's HCS topic
+curl -s "https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages" | python -m json.tool
+
+# Each message contains: sequence_number, consensus_timestamp, message (base64-encoded JSON)
+```
+
+---
+
+## Test Results Summary (Golden Flow — 7/7 PASS)
 
 | Phase | Operation | Result | TX / On-Chain |
 |-------|-----------|--------|---------------|
-| 1 | Task Creation + Escrow Lock (Base) | PASS | [`0x7c0fc1a4...`](https://basescan.org/tx/0x7c0fc1a4b69e8d1e89641bc5e735f7b892f8e4f863fe8d37c435c4f33695c6b2) |
-| 2 | Worker Assignment + Evidence Submission | PASS | Task `c767b255-00bc-4de7-8638-f5d777440248` |
-| 3 | Approval + Payment Release (Base) | PASS | [`0x2d6ca373...`](https://basescan.org/tx/0x2d6ca373c4748a3c37c180f8c6637a0b51f22facddcfb7fd46d1e464d01df08b) |
-| 4 | Agent-to-Worker Reputation (Hedera) | PASS | [`0x9e647420...`](https://hashscan.io/testnet/transaction/0x9e6474208b70c14fb608de0e1a5ddeb8219d9a0ec2687ba6596e905db45893e5) |
-| 5 | Worker-to-Agent Reputation (Hedera) | PASS | [`0x78e2b71b...`](https://hashscan.io/testnet/transaction/0x78e2b71b4bc719de457f44f3e018ce799888454a54523294a43690f318f0d572) |
-| 6 | Merit Tip 0.01 HBAR (Hedera) | PASS | [`0x820ab464...`](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c) |
+| 1 | Task Creation + Escrow Lock (Base) | PASS | [`0x8308ddd1...`](https://basescan.org/tx/0x8308ddd152a50a6e08b8a199c67952800a9fffa16761d2811e08fcbd38404e6e) |
+| 2 | Worker Assignment + Evidence Submission | PASS | Task `1e076d51-979a-4977-b194-644e6da6e090` |
+| 3 | Approval + Payment Release (Base) | PASS | [`0xaffdb027...`](https://basescan.org/tx/0xaffdb027d41389679ccb1201179349c00e682fc6f26e0b153e5b6aa246121872) |
+| 4 | Agent-to-Worker Reputation (Hedera) | PASS | [`0xc5ca1696...`](https://hashscan.io/testnet/transaction/0xc5ca1696439f658aa6ec5d16d31e611eda0406b37ae69a40e91ab3a69aa8e2f0) |
+| 5 | Worker-to-Agent Reputation (Hedera) | PASS | [`0x3744d028...`](https://hashscan.io/testnet/transaction/0x3744d028d1fcad0ac75eeec622e742b0429b5c1be9f866474a34bd01624b230b) |
+| 6 | Merit Tip 0.01 HBAR (Hedera) | PASS | [`0x1c4ce9dc...`](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83) |
+| 7 | HCS Event Logging (Hedera-native) | PASS | [Topic `0.0.8511371`](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages) — 6 messages |
 
-**Reputation after Golden Flow**: count=25, avg=87
+**Task**: `1e076d51-979a-4977-b194-644e6da6e090` | **Bounty**: $0.05 USDC | **HCS Topic**: `0.0.8511371`
 
 ---
 
 ## Cross-Chain Transaction Summary
 
-| # | Operation | Chain | TX Hash | Explorer |
-|---|-----------|-------|---------|----------|
-| 1 | Escrow Lock (task creation) | Base | `0x7c0fc1a4b69e8d1e89641bc5e735f7b892f8e4f863fe8d37c435c4f33695c6b2` | [BaseScan](https://basescan.org/tx/0x7c0fc1a4b69e8d1e89641bc5e735f7b892f8e4f863fe8d37c435c4f33695c6b2) |
-| 2 | Payment Release (approval) | Base | `0x2d6ca373c4748a3c37c180f8c6637a0b51f22facddcfb7fd46d1e464d01df08b` | [BaseScan](https://basescan.org/tx/0x2d6ca373c4748a3c37c180f8c6637a0b51f22facddcfb7fd46d1e464d01df08b) |
-| 3 | Agent-to-Worker Reputation | Hedera Testnet | `0x9e6474208b70c14fb608de0e1a5ddeb8219d9a0ec2687ba6596e905db45893e5` | [HashScan](https://hashscan.io/testnet/transaction/0x9e6474208b70c14fb608de0e1a5ddeb8219d9a0ec2687ba6596e905db45893e5) |
-| 4 | Worker-to-Agent Reputation | Hedera Testnet | `0x78e2b71b4bc719de457f44f3e018ce799888454a54523294a43690f318f0d572` | [HashScan](https://hashscan.io/testnet/transaction/0x78e2b71b4bc719de457f44f3e018ce799888454a54523294a43690f318f0d572) |
-| 5 | Merit Tip (0.01 HBAR) | Hedera Testnet | `0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c` | [HashScan](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c) |
+| # | Operation | Chain | TX Hash / Topic | Explorer |
+|---|-----------|-------|-----------------|----------|
+| 1 | Escrow Lock (task creation) | Base | `0x8308ddd152a50a6e08b8a199c67952800a9fffa16761d2811e08fcbd38404e6e` | [BaseScan](https://basescan.org/tx/0x8308ddd152a50a6e08b8a199c67952800a9fffa16761d2811e08fcbd38404e6e) |
+| 2 | Payment Release (approval) | Base | `0xaffdb027d41389679ccb1201179349c00e682fc6f26e0b153e5b6aa246121872` | [BaseScan](https://basescan.org/tx/0xaffdb027d41389679ccb1201179349c00e682fc6f26e0b153e5b6aa246121872) |
+| 3 | Agent-to-Worker Reputation | Hedera Testnet | `0xc5ca1696439f658aa6ec5d16d31e611eda0406b37ae69a40e91ab3a69aa8e2f0` | [HashScan](https://hashscan.io/testnet/transaction/0xc5ca1696439f658aa6ec5d16d31e611eda0406b37ae69a40e91ab3a69aa8e2f0) |
+| 4 | Worker-to-Agent Reputation | Hedera Testnet | `0x3744d028d1fcad0ac75eeec622e742b0429b5c1be9f866474a34bd01624b230b` | [HashScan](https://hashscan.io/testnet/transaction/0x3744d028d1fcad0ac75eeec622e742b0429b5c1be9f866474a34bd01624b230b) |
+| 5 | Merit Tip (0.01 HBAR) | Hedera Testnet | `0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83` | [HashScan](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83) |
+| 6 | HCS Event Logging (6 msgs) | Hedera Testnet (native) | Topic `0.0.8511371` | [Mirror Node](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages) |
 
 ---
 
@@ -166,42 +217,47 @@ sequenceDiagram
     participant EM as Execution Market<br/>(Base + Hedera)
     participant F as Facilitator<br/>(pays gas on all chains)
     participant B as Base Mainnet<br/>(escrow + payments)
-    participant IR as Identity Registry<br/>(ERC-8004 on Hedera)
     participant RR as Reputation Registry<br/>(ERC-8004 on Hedera)
+    participant HCS as HCS Topic<br/>(Hedera-native)
     participant H as Hedera Testnet<br/>(chain 296)
 
     Note over EM,H: Phase 1: Task Creation + Escrow Lock (Base)
     EM->>F: Lock escrow (agent-signed EIP-3009)
     F->>B: AuthCaptureEscrow.lock()
-    B-->>F: TX 0x7c0fc1a4...
+    B-->>F: TX 0x8308ddd1...
     F-->>EM: Escrow locked on Base
+    EM->>HCS: task_created + escrow_locked
 
-    Note over EM,H: Phase 2-3: Worker submits evidence, Agent approves
+    Note over EM,H: Phase 2-3: Worker applies, submits evidence, Agent approves
+    EM->>HCS: worker_applied
     EM->>F: Release payment to worker
     F->>B: AuthCaptureEscrow.release() (87% worker, 13% fee)
-    B-->>F: TX 0x2d6ca373...
+    B-->>F: TX 0xaffdb027...
     F-->>EM: Payment released on Base
+    EM->>HCS: payment_released
 
     Note over EM,H: Phase 4: Agent rates Worker (Hedera)
     EM->>F: POST /feedback<br/>{network: "hedera-testnet", agentId: 99, score: 90}
     F->>RR: giveFeedback(99, 90, tags)
     RR->>H: On-chain TX (Facilitator pays HBAR)
-    H-->>RR: Feedback stored
-    RR-->>F: TX 0x9e647420...
-    F-->>EM: {count: 25, avg: 87}
+    RR-->>F: TX 0xc5ca1696...
+    EM->>HCS: reputation_agent_to_worker
 
     Note over EM,H: Phase 5: Worker rates Agent (Hedera)
     EM->>F: POST /feedback<br/>{network: "hedera-testnet", agentId: 99, score: 85}
     F->>RR: giveFeedback(99, 85, tags)
     RR->>H: On-chain TX (Facilitator pays HBAR)
-    H-->>RR: Feedback stored
-    RR-->>F: TX 0x78e2b71b...
+    RR-->>F: TX 0x3744d028...
+    EM->>HCS: reputation_worker_to_agent
 
     Note over EM,H: Phase 6: Merit Tip (score > 80 triggers HBAR payment)
     EM->>F: Send 0.01 HBAR to worker
     F->>H: Direct HBAR transfer
-    H-->>F: TX 0x820ab464...
+    H-->>F: TX 0x1c4ce9dc...
     F-->>EM: Merit tip sent (0.01 HBAR)
+
+    Note over EM,H: Phase 7: HCS Audit Trail (Hedera-native)
+    Note over HCS: 6 messages on Topic 0.0.8511371<br/>Immutable, ordered, publicly verifiable<br/>via Mirror Node REST API
 ```
 
 ---
@@ -284,7 +340,7 @@ Execution Market Agent #2106 (Base mainnet — production)
     +-- Celo         (ERC-8004 Identity + x402 Escrow + Payments)
     +-- Monad        (ERC-8004 Identity + x402 Escrow + Payments)
     +-- SKALE        (ERC-8004 Identity + x402 Escrow + Payments)
-    +-- Hedera NEW   (ERC-8004 Identity + Reputation + HBAR Merit Tips) <-- You are here
+    +-- Hedera NEW   (ERC-8004 Identity + Reputation + HBAR Merit Tips + HCS Event Logging) <-- You are here
 ```
 
 Agent identity and reputation on Hedera are interoperable with all other chains
@@ -292,4 +348,4 @@ via the Ultravioleta Facilitator. An agent's reputation on Hedera is queryable
 from any other chain's perspective.
 
 **Golden Flow demonstrates cross-chain composability**: escrow and USDC payments on Base,
-reputation and HBAR merit tips on Hedera — all in a single task lifecycle.
+reputation, HBAR merit tips, and HCS immutable event logging on Hedera — all in a single task lifecycle.
