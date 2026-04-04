@@ -10,7 +10,7 @@ from typing import Optional
 
 import httpx
 
-from .config import RPC_URL, CHAIN_ID, EXPLORER_URL, NETWORK_LABEL
+from config import RPC_URL, CHAIN_ID, EXPLORER_URL, NETWORK_LABEL
 
 logger = logging.getLogger(__name__)
 

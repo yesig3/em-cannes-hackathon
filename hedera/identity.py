@@ -10,7 +10,7 @@ from typing import Optional
 
 import httpx
 
-from .config import FACILITATOR_URL, FACILITATOR_NETWORK
+from config import FACILITATOR_URL, FACILITATOR_NETWORK
 
 logger = logging.getLogger(__name__)
 
