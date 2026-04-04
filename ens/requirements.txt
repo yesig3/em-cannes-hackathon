@@ -1,0 +1,4 @@
+# ENS Integration Dependencies
+web3>=6.15.0          # ENS support built-in (address, name, resolver)
+eth-abi>=5.0.0        # ABI encoding for text record calls
+python-dotenv>=1.0.0  # Environment variable loading
