@@ -12,8 +12,6 @@ import logging
 from typing import Optional
 
 from web3 import Web3
-from eth_utils import to_bytes
-from eth_abi import encode
 
 from config import (
     RPC_URL,

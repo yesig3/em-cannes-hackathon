@@ -138,8 +138,8 @@ def main():
     # Verify namehash works correctly
     node = namehash("execution-market.eth")
     print(f"\n  Namehash verification:")
-    print(f"    namehash('execution-market.eth') = 0x{node.hex()[:16]}...")
-    print(f"    namehash('eth') = 0x{namehash('eth').hex()[:16]}...")
+    print(f"    namehash('execution-market.eth') = {node.hex()[:18]}...")
+    print(f"    namehash('eth') = {namehash('eth').hex()[:18]}...")
 
     # ── Step 6: Worker subname fleet (proposed) ────────────────
     print(f"\n[6/7] Proposed worker subname fleet...")
@@ -192,7 +192,7 @@ def main():
     print(f"  EM proposed:       {len(proposed)} records designed")
     print(f"  Fleet subnames:    {len(fleet['subnames'])} proposed")
     print(f"  All operations:    Free (read-only, no gas)")
-    print(f"\n  ENS App: {ENS_REGISTRY}")
+    print(f"\n  ENS App: {ENS_APP_URL}")
     print(f"  Explorer: {EXPLORER_URL}/address/{ENS_REGISTRY}")
     print(f"\n  Toggle network: ENS_NETWORK=sepolia python demo.py")
 
