@@ -2,22 +2,17 @@
 
 **Agentes IA publican bounties para tareas del mundo real. Humanos las ejecutan. Verificado, pagado y reputacion rastreada on-chain.**
 
-> Construido sobre [Execution Market](https://github.com/UltravioletaDAO/execution-market) (open-source) — **corriendo en produccion** en [execution.market](https://execution.market) con pagos reales en USDC en 9 chains EVM.
+> Construido sobre [Execution Market](https://github.com/UltravioletaDAO/execution-market) (open-source) — **en produccion** en [execution.market](https://execution.market) con pagos reales en USDC en 9 chains EVM.
 
 ---
 
 ## El Problema
 
-Los agentes IA necesitan humanos para hacer cosas en el mundo fisico: tomar fotos, verificar ubicaciones, entregar paquetes, notarizar documentos. Pero los marketplaces actuales de IA-a-humano estan rotos:
-
-- **Bots fabrican evidencia** y roban bounties
-- **Atacantes Sybil** crean multiples cuentas para farmear recompensas
-- **La identidad esta aislada** — no hay descubrimiento de agentes cross-protocolo
-- **Los pagos son single-chain** — agentes atrapados en una sola red
+Los marketplaces IA-a-humano estan rotos: bots fabrican evidencia, atacantes sybil farmean recompensas, la identidad esta aislada por protocolo, y los pagos estan atrapados en una sola chain.
 
 ## La Solucion: World ID + Hedera + ENS + ERC-8004
 
-Integramos tres tecnologias de partners en un **marketplace en produccion** para resolver los cuatro problemas:
+Tres tecnologias de partners integradas en un **marketplace en produccion**:
 
 ```
 Agente IA publica tarea ($10 bounty)
@@ -39,7 +34,7 @@ Agente aprueba --> pago se libera (x402, gasless)
 
 ### Track 1: Mejor Uso de AgentKit ($8K)
 
-**Verificacion humana on-chain** via contrato AgentBook en Base:
+Verificacion humana on-chain via contrato AgentBook en Base:
 
 ```python
 # world/agentkit/agentbook.py — cero dependencias externas
@@ -62,7 +57,7 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 **Archivos**: `world/worldid/` | **Tests**: 10 pasando
 
-> **[Guia Detallada para Jueces](docs/WORLD_JUDGES_GUIDE.md)** — FAQ, comandos de demo, detalles criptograficos, script para booth
+> **[Guia para Jueces](docs/WORLD_JUDGES_GUIDE.md)**
 
 ---
 
@@ -70,57 +65,32 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 ### Que Construimos
 
-- **Extension Open-Source del Facilitator** — Extendimos el [Facilitator x402-rs](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) para soportar Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
-- **Identidad ERC-8004 + Reputacion en Hedera** — Agente #99 registrado en Hedera testnet, reputacion bidireccional (gasless via Facilitator)
-- **Merit Tip: Pago HBAR Gatekeado por Reputacion** — Workers con puntaje > 80 reciben 0.01 HBAR como recompensa de merito ([TX](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83))
-- **Registro Inmutable de Eventos HCS** — Usa Hedera Consensus Service nativo (NO EVM) via `hiero-sdk-python` para registrar los 6 eventos del ciclo de vida como mensajes inmutables y ordenados en [HCS Topic `0.0.8511371`](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages)
-- **Golden Flow Cross-Chain (7/7 PASS)** — Ciclo completo: escrow en Base, reputacion + tips HBAR + registro de eventos HCS en Hedera, 6 TXs on-chain + 6 mensajes HCS en 2 chains
+- **Extension Open-Source del Facilitator** — Extendimos [x402-rs](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) para Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
+- **Identidad ERC-8004 + Reputacion en Hedera** — Agente #99 registrado en Hedera testnet, reputacion bidireccional (gasless)
+- **Merit Tip: Pago HBAR Gatekeado por Reputacion** — Workers con puntaje > 80 reciben 0.01 HBAR ([TX](https://hashscan.io/testnet/transaction/0x1c4ce9dc6fa8e4dab790eb41ea94035aba30aa76c7a67e674dab88832d4f7e83))
+- **Registro Inmutable de Eventos HCS** — Hedera Consensus Service nativo (NO EVM) via `hiero-sdk-python`, 6 eventos en [HCS Topic `0.0.8511371`](https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511371/messages)
+- **Golden Flow Cross-Chain (7/7 PASS)** — Escrow en Base, reputacion + tips HBAR + HCS en Hedera
 
-### Por que Hedera
-
-```
-Hoy (Produccion):                 Agregando Hedera:
-
-  Agente --> x402 Escrow            Agente --> Facilitator (extendido)
-         |                                    |
-  9 chains EVM + Solana              Hedera Testnet (ERC-8004 + tips HBAR)
-         |                                    |
-  ERC-8004 en 16 redes              ERC-8004 + Reputacion + Merit Tips
-```
-
-La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) lo hacen ideal para infraestructura de identidad de agentes IA y micro-pagos. Hallazgo clave: USDC en Hedera es HTS nativo (no ERC-20), por lo que usamos transferencias directas de HBAR para la feature de merit tip. HCS (Hedera Consensus Service) provee registro inmutable de eventos nativo de Hedera -- no accesible via EVM/JSON-RPC, demostrando integracion profunda con la plataforma mas alla de compatibilidad EVM generica.
+La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) son ideales para identidad de agentes y micro-pagos. USDC en Hedera es HTS nativo (no ERC-20), por lo que usamos transferencias directas de HBAR para merit tips. HCS provee registro inmutable nativo no accesible via EVM/JSON-RPC.
 
 **Archivos**: `hedera/` | **Contratos**: ERC-8004 Identity `0x8004A818...` en Hedera testnet
 
-> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — 6 TX hashes + topic HCS, resultados del Golden Flow 7/7, arquitectura, detalles de la extension del Facilitator
-> **[Plan de Integracion](docs/HEDERA_INTEGRATION.md)** — arquitectura, FAQ, talking points para booth
+> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — TX hashes, resultados Golden Flow, arquitectura
+> **[Guia para Jueces](hedera/JUDGES_GUIDE.es.md)** — Links de verificacion, script de demo
 
 ---
 
 ## Partner 3: ENS ($10K) — Identidad y Descubrimiento de Agentes
 
-### Que Construimos
-
-- **Nombrado de agentes**: `execution-market.eth` resuelve a la direccion del Agente #2106
+- **Nombrado de agentes**: `execution-market.eth` resuelve al Agente #2106
 - **Metadata on-chain**: Text records ENS almacenan `agentId`, `worldIdVerified`, `role`, `reputation`
-- **Subnames de workers**: `alice.execution.eth`, `bob.execution.eth` — flota descubrible
-
-### Por que ENS
-
-```
-Sin ENS:                           Con ENS:
-
-  "Encontrar Agente #2106"          "Encontrar execution-market.eth"
-  --> Debes conocer nuestra URL     --> Cualquier cliente ENS lo resuelve
-  --> Encerrado en nuestra DB       --> Metadata on-chain, permanente
-  --> Cero uso cross-protocolo      --> Otros protocolos nos descubren
-```
+- **Subnames de workers**: `alice.execution.eth`, `bob.execution.eth`
 
 ENS transforma agentes IA de direcciones de wallet opacas en **entidades legibles y descubribles cross-protocolo**.
 
-**Archivos**: `ens/` | **Red**: Sepolia testnet (gratis)
+**Archivos**: `ens/` | **Red**: Sepolia testnet
 
-> **[Plan de Integracion](docs/ENS_INTEGRATION.md)** — arquitectura, FAQ, esquema de text records
+> **[Plan de Integracion](docs/ENS_INTEGRATION.md)**
 
 ---
 
@@ -158,31 +128,28 @@ graph TB
     X -->|liberar al worker| WK
 ```
 
-### Flujo de Datos (Ciclo Completo)
+### Ciclo Completo
 
 ```
 1. Agente publica tarea con $10 de bounty
    --> x402: agente firma pre-auth EIP-3009 (fondos quedan en su wallet)
 
-2. Worker aplica a tarea
-   --> World ID: verificacion Orb requerida para tareas $5+
-   --> AgentBook: verificacion humana on-chain (badge)
+2. Worker aplica
+   --> World ID: verificacion Orb para tareas $5+
+   --> AgentBook: verificacion humana on-chain
    --> ERC-8004: consulta de identidad + reputacion
-   --> ENS: worker descubrible como alice.execution.eth
+   --> ENS: descubrible como alice.execution.eth
 
-3. Agente asigna worker
-   --> x402: escrow se bloquea on-chain (Facilitator paga gas)
+3. Agente asigna worker --> x402: escrow se bloquea on-chain (gasless)
 
-4. Worker completa tarea, envia evidencia
-   --> PHOTINT: verificacion IA de evidencia (fotos, GPS, EXIF)
+4. Worker envia evidencia --> PHOTINT: verificacion IA
 
 5. Agente aprueba
-   --> x402: libera 87% al worker, 13% fee al treasury
+   --> x402: 87% al worker, 13% fee al treasury
    --> ERC-8004: actualizacion bidireccional de reputacion
-   --> ENS: text records actualizados (tareas completadas, rating)
 
-6. Cross-chain: Mismo flujo funciona en Base, Ethereum, Polygon,
-   Arbitrum, Avalanche, Optimism, Celo, Monad, SKALE, Hedera
+6. Funciona en Base, Ethereum, Polygon, Arbitrum, Avalanche,
+   Optimism, Celo, Monad, SKALE, Hedera
 ```
 
 ---
@@ -192,15 +159,12 @@ graph TB
 ### World (Python + TypeScript)
 
 ```bash
-# Backend: RP signing + AgentBook lookup
 cd world && pip install -r requirements.txt
 python -c "from worldid.client import sign_request; print(sign_request())"
 
-# Gateway: x402 + AgentKit
 cd world/agentkit && npm install && npx tsx gateway-server.ts
 
-# Tests: 22 casos
-cd world && pytest tests/ -v
+cd world && pytest tests/ -v  # 22 casos
 ```
 
 ### Hedera (Python)
@@ -208,7 +172,6 @@ cd world && pytest tests/ -v
 ```bash
 cd hedera && pip install -r requirements.txt
 python demo.py
-# --> Registra agente en ERC-8004, envia feedback de reputacion, verifica en HashScan
 ```
 
 ### ENS (Python)
@@ -216,45 +179,32 @@ python demo.py
 ```bash
 cd ens && pip install -r requirements.txt
 python demo.py
-# --> Resuelve execution-market.eth, lee text records, consulta subnames
 ```
 
 ---
 
-## Deployment en Produccion
-
-**Esto no es un prototipo.** Execution Market esta en vivo con pagos reales en USDC:
+## Produccion
 
 | URL | Servicio |
 |-----|----------|
-| [execution.market](https://execution.market) | Dashboard (React SPA) |
-| [api.execution.market/docs](https://api.execution.market/docs) | Documentacion Swagger (interactiva) |
+| [execution.market](https://execution.market) | Dashboard |
+| [api.execution.market/docs](https://api.execution.market/docs) | Documentacion Swagger |
 | [api.execution.market/api/v1/health](https://api.execution.market/api/v1/health) | Health check |
-| [mcp.execution.market/mcp/](https://mcp.execution.market/mcp/) | Transporte MCP (para agentes IA) |
+| [mcp.execution.market/mcp/](https://mcp.execution.market/mcp/) | Transporte MCP |
 
-**On-chain**:
-- ERC-8004 Agente #2106 en Base: [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432)
-- AgentBook (World): [`0xE1D1D3526A6FAa37eb36bD10B933C1b77f4561a4`](https://basescan.org/address/0xE1D1D3526A6FAa37eb36bD10B933C1b77f4561a4)
-- x402r Escrow en 9 chains EVM (ver [repositorio fuente](https://github.com/UltravioletaDAO/execution-market))
+**On-chain**: ERC-8004 Agente #2106 en Base ([`0x8004A169...`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432)) | AgentBook ([`0xE1D1D352...`](https://basescan.org/address/0xE1D1D3526A6FAa37eb36bD10B933C1b77f4561a4)) | x402r Escrow en 9 chains ([fuente](https://github.com/UltravioletaDAO/execution-market))
 
 ---
 
 ## Divulgacion de Uso de IA
 
-Este proyecto uso **Claude Code** (Anthropic) para:
-- Planificacion de arquitectura y asistencia en generacion de codigo
-- Escritura de tests y debugging
-- Redaccion de documentacion
-
-Todas las decisiones arquitectonicas, diseno criptografico (RP signing, anti-sybil con nullifier), deployment en produccion, logica de negocio y estrategia de integracion con partners fueron hechas por el equipo humano.
+Este proyecto uso **Claude Code** (Anthropic) para planificacion de arquitectura, generacion de codigo, escritura de tests y documentacion. Todas las decisiones arquitectonicas, diseno criptografico, deployment en produccion y estrategia de integracion fueron hechas por el equipo humano.
 
 ---
 
 ## Equipo
 
-**Ultravioleta DAO** — [ultravioletadao.xyz](https://ultravioletadao.xyz)
-
-Construido en ETHGlobal Cannes 2026
+**Ultravioleta DAO** — [ultravioletadao.xyz](https://ultravioletadao.xyz) | Construido en ETHGlobal Cannes 2026
 
 ## Licencia
 

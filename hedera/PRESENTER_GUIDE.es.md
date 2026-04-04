@@ -2,78 +2,71 @@
 
 > Para Yesi y David en el booth de Hedera, ETHGlobal Cannes 2026.
 > Lean esto en el celular antes de acercarse al booth.
-> **Ver tambien**: [Guia para Jueces](../docs/HEDERA_JUDGES_GUIDE.es.md) para el desglose tecnico completo con todos los links de verificacion.
+> **Detalles tecnicos completos**: [Guia para Jueces](JUDGES_GUIDE.es.md)
 
 ---
 
 ## Que Decir (30 segundos)
 
-"Execution Market es un marketplace en vivo donde agentes de IA publican bounties y humanos las completan por pago instantaneo. Corremos en 9 blockchains en produccion con USDC real. Para este hackathon, agregamos Hedera con cinco integraciones -- incluyendo HCS, Hedera Consensus Service, que es un feature nativo de Hedera que no existe en EVM. Cada evento del ciclo de vida de una tarea se registra como un mensaje inmutable que cualquiera puede verificar."
+"Execution Market es un marketplace en vivo donde agentes de IA publican bounties y humanos las completan por pago instantaneo. 9 blockchains en produccion con USDC real. Para este hackathon, agregamos Hedera con cinco integraciones -- incluyendo HCS, un feature nativo de Hedera que no existe en EVM. Cada evento se registra como mensaje inmutable que cualquiera puede verificar."
 
 ---
 
-## Que Mostrar (paso a paso)
+## Que Mostrar
 
-**Tengan estas pestanas abiertas ANTES de la demo:**
+**Abrir estas pestanas ANTES de la demo:**
 
-1. Pestana 1: https://execution.market (el marketplace en vivo)
-2. Pestana 2: https://hashscan.io/testnet/transaction/0x419d824ca972ddae63b6da1597bad2c4c52172fa1339897d1e2a95c36e9a3321 (TX Merit Tip)
-3. Pestana 3: https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511429/messages (mensajes HCS)
-4. Pestana 4: https://api.execution.market/docs (Swagger API)
+1. https://execution.market (marketplace en vivo)
+2. https://hashscan.io/testnet/transaction/0x419d824ca972ddae63b6da1597bad2c4c52172fa1339897d1e2a95c36e9a3321 (TX Merit Tip)
+3. https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.8511429/messages (mensajes HCS)
+4. https://api.execution.market/docs (Swagger API)
 
-**Pasos de la demo:**
+**Pasos:**
 
-1. Mostrar Pestana 1 (dashboard). Decir: "Este es nuestro marketplace en produccion. Los agentes de IA crean tareas, los humanos las completan, y los pagos se hacen automaticamente en USDC."
-2. Cambiar a Pestana 2 (TX Merit Tip en HashScan). Decir: "Este es un pago real de HBAR en Hedera testnet. Cuando un worker recibe un puntaje de reputacion alto, el agente le envia 0.01 HBAR como propina automaticamente. Pago gatekeado por reputacion."
-3. Cambiar a Pestana 3 (HCS Mirror Node). Decir: "Este es nuestro diferenciador clave -- Hedera Consensus Service. Cada evento del ciclo de vida se registra como un mensaje inmutable con un timestamp de consenso de los nodos de Hedera. Pueden ver 6 eventos: tarea creada, worker aplico, escrow bloqueado, pago liberado, y ambas calificaciones. Cualquiera puede verificar -- no se necesita API key."
-4. Decir: "Entonces usamos ERC-8004 para identidad, reputacion on-chain, merit tips en HBAR, y HCS para registro nativo de eventos. Cinco operaciones en Hedera, mas escrow de USDC en Base. Golden Flow: 7 de 7 fases pasan."
-5. Si piden mas detalle, cambiar a Pestana 4 (Swagger) y mostrar el endpoint de health. Decir: "Esto esta en vivo -- 9 chains EVM en produccion hoy."
+1. **Pestana 1** (dashboard): "Marketplace en produccion. Agentes IA crean tareas, humanos las completan, pagos automaticos en USDC."
+2. **Pestana 2** (TX Merit Tip): "Pago real de HBAR en Hedera testnet. Worker recibe 0.01 HBAR automaticamente cuando tiene buen puntaje de reputacion."
+3. **Pestana 3** (HCS Mirror Node): "Diferenciador clave -- Hedera Consensus Service. Cada evento registrado como mensaje inmutable con timestamp de consenso. 6 eventos: tarea creada, worker aplico, escrow bloqueado, pago liberado, ambas calificaciones. Cualquiera verifica, sin API key."
+4. **Cierre**: "Identidad ERC-8004, reputacion on-chain, merit tips HBAR, registro HCS nativo. 5 operaciones Hedera + escrow USDC en Base. Golden Flow 7/7."
+5. Si piden mas: Pestana 4 (Swagger), mostrar health endpoint. "En vivo -- 9 chains EVM en produccion."
 
 ---
 
 ## Puntos Clave
 
-- Somos un marketplace EN PRODUCCION, no un prototipo de hackathon. Pagos reales en USDC en 9 chains hoy.
-- **HCS (Hedera Consensus Service)** es nuestro diferenciador clave -- es NATIVO de Hedera, no EVM. Usamos `hiero-sdk-python` para registrar cada evento como mensaje inmutable. Timestamps de consenso acordados por nodos de Hedera, no nuestro servidor.
-- **Merit Tip**: 0.01 HBAR de transferencia directa cuando workers superan el umbral de reputacion. Operacion financiera real, gatekeada por reputacion on-chain.
-- Identidad ERC-8004 y reputacion bidireccional en Hedera testnet. Agente #99 es nuestra identidad de plataforma.
-- Extendimos nuestro Facilitator open-source (Rust, 21 blockchains) para soportar Hedera. Agentes nunca necesitan HBAR para gas.
-- Workers pueden ser verificados en una chain (como Base) y construir reputacion en otra (como Hedera). Composabilidad cross-chain.
-- Golden Flow E2E: **7/7 PASS** -- 5 TXs on-chain + 6 mensajes HCS en 2 chains.
+- Marketplace EN PRODUCCION, no un prototipo. USDC real en 9 chains.
+- **HCS** es NATIVO de Hedera, no EVM. `hiero-sdk-python` para registro inmutable. Timestamps de consenso de nodos Hedera.
+- **Merit Tip**: 0.01 HBAR cuando workers superan umbral de reputacion.
+- Identidad ERC-8004 + reputacion bidireccional en Hedera testnet. Agente #99.
+- Facilitator open-source (Rust, 21 blockchains) extendido para Hedera. Agentes nunca necesitan HBAR.
+- Composabilidad cross-chain: verificado en Base, pagado en Hedera, reputacion compartida.
+- Golden Flow: **7/7 PASS** -- 5 TXs + 6 mensajes HCS en 2 chains.
 
 ---
 
-## Preguntas que los Jueces Van a Hacer (y respuestas)
+## Preguntas Esperadas
 
-**"Por que Hedera especificamente?"**
-Finalidad rapida (3-5 segundos), comisiones muy bajas (fracciones de centavo), compatibilidad EVM para nuestros contratos de identidad, Y HCS -- un feature nativo de Hedera para registro inmutable de eventos que no existe en ninguna otra chain.
+**"Por que Hedera?"** -- Finalidad rapida (3-5s), fees bajos, compatibilidad EVM para identidad, Y HCS para registro inmutable nativo.
 
-**"Que es HCS y por que lo usan?"**
-Hedera Consensus Service crea un log de eventos inmutable y ordenado con timestamps acordados por los nodos de Hedera. Registramos cada evento del ciclo de vida de una tarea -- creacion, aplicacion, escrow, pago, reputacion. Es una pista de auditoria a prueba de manipulacion que cualquiera puede verificar via la API publica del Mirror Node. Demuestra que usamos Hedera mas alla de EVM generico.
+**"Que es HCS?"** -- Log de eventos inmutable y ordenado con timestamps de consenso. Audit trail a prueba de manipulacion. Verificable via API publica del Mirror Node. Demuestra uso de Hedera mas alla de EVM.
 
-**"Esto corre en Hedera mainnet?"**
-Identidad, reputacion y HCS estan en Hedera testnet. Pagos USDC corren en Base mainnet (dinero real). Nuestro codigo soporta mainnet via una sola variable de entorno.
+**"Mainnet?"** -- Identidad/reputacion/HCS en Hedera testnet. USDC en Base mainnet. Una variable de entorno cambia a mainnet.
 
-**"Que es ERC-8004?"**
-Un registro de identidad on-chain para agentes de IA. Agente #99 es la identidad de nuestra plataforma en Hedera. Desplegado en 16 redes con la misma direccion. Listado por Hedera como tecnologia aceptada ("Trustless Agents").
+**"Que es ERC-8004?"** -- Identidad on-chain para agentes IA. Agente #99 en Hedera. 16 redes, misma direccion. Listado por Hedera como tech aceptada.
 
-**"Como son los pagos gasless?"**
-Nuestro Facilitator open-source (servidor Rust) paga gas HBAR para todo. Agentes y workers nunca necesitan HBAR.
+**"Gasless?"** -- Facilitator (Rust) paga gas HBAR. Mismo modelo en 9 chains de produccion.
 
-**"Cuantas chains soportan?"**
-9 chains EVM en produccion (Base, Ethereum, Polygon, Arbitrum, Avalanche, Optimism, Celo, Monad, SKALE) mas Solana. Hedera es la mas reciente.
+**"Cuantas chains?"** -- 9 EVM + Solana en produccion. Hedera es la mas reciente.
 
-**Si preguntan algo que no saben:**
-"Excelente pregunta -- nuestro lider tecnico puede dar seguimiento. Dejenme mostrarles otra cosa."
+**Si no saben:** "Excelente pregunta -- nuestro lider tecnico puede dar seguimiento. Dejenme mostrarles otra cosa."
 
 ---
 
 ## Que NO Decir
 
-- NO digan "solo tenemos testnet." Digan "identidad, reputacion y HCS estan en Hedera testnet; pagos estan en Base mainnet."
-- NO digan "no soportamos Hedera todavia." Digan "Hedera esta en vivo con 5 integraciones -- identidad, reputacion, HBAR tips, HCS, y extension del Facilitator."
-- NO intenten explicar EIP-3009 o diferencias de tokens HTS. Solo digan "nuestro sistema de pagos es agnostico a la chain."
-- NO prometan fecha de lanzamiento en mainnet. Digan "esta en nuestro roadmap para Q2 2026."
+- NO "solo testnet" --> "identidad/reputacion/HCS en Hedera testnet; pagos en Base mainnet"
+- NO "no soportamos Hedera" --> "Hedera en vivo con 5 integraciones"
+- NO explicar EIP-3009 ni diferencias HTS. Decir "sistema de pagos agnostico a la chain"
+- NO prometer fecha de mainnet. Decir "en nuestro roadmap para Q2 2026"
 
 ---
 
@@ -88,5 +81,5 @@ Nuestro Facilitator open-source (servidor Rust) paga gas HBAR para todo. Agentes
 | Identidad Agente | https://facilitator.ultravioletadao.xyz/identity/hedera-testnet/99 |
 | Reputacion Agente | https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/99 |
 | GitHub | https://github.com/UltravioletaDAO/em-cannes-hackathon |
-| Guia para Jueces | [docs/HEDERA_JUDGES_GUIDE.es.md](../docs/HEDERA_JUDGES_GUIDE.es.md) |
+| Guia para Jueces | [JUDGES_GUIDE.es.md](JUDGES_GUIDE.es.md) |
 | Contacto | @ExecutionMarket en X |
