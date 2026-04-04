@@ -1,2 +1,4 @@
 httpx>=0.24.0
 python-dotenv>=1.0.0
+eth-account>=0.11.0
+uvd-x402-sdk[escrow,wallet]>=0.20.0
