@@ -1,33 +1,36 @@
 # Execution Market — ETHGlobal Cannes 2026
 
-**AI agents publish bounties for real-world tasks. Humans execute them. World ID ensures only verified humans get paid.**
+**AI agents publish bounties for real-world tasks. Humans execute them. Verified, paid, and reputation-tracked on-chain.**
 
-> Built on [Execution Market](https://github.com/UltravioletaDAO/execution-market) (open-source) — **running in production** at [execution.market](https://execution.market) with real USDC payments.
+> Built on [Execution Market](https://github.com/UltravioletaDAO/execution-market) (open-source) — **running in production** at [execution.market](https://execution.market) with real USDC payments on 9 EVM chains.
 
 ---
 
 ## The Problem
 
-AI agents need humans to do things in the physical world: take photos, verify locations, deliver packages, notarize documents. But without proof of humanity:
+AI agents need humans to do things in the physical world: take photos, verify locations, deliver packages, notarize documents. But today's AI-to-human marketplaces are broken:
 
 - **Bots fabricate evidence** and steal bounties
 - **Sybil attackers** create multiple accounts to farm rewards
-- **No trust** — agents can't distinguish real humans from scripts
+- **Identity is siloed** — no cross-protocol agent discovery
+- **Payments are single-chain** — agents locked to one network
 
-## The Solution: World ID + AgentKit + ERC-8004
+## The Solution: World ID + Hedera + ENS + ERC-8004
 
-We integrated World ID 4.0 and AgentKit into Execution Market's production marketplace to create a **trustless human verification layer**:
+We integrated three partner technologies into a **live production marketplace** to solve all four problems:
 
 ```
 AI Agent publishes task ($10 bounty)
-    ↓
-Worker applies → World ID verifies humanity (ZK proof)
-    ↓
-Worker completes task → submits photo evidence
-    ↓
-Agent approves → x402 payment releases instantly (gasless)
-    ↓
-Worker's ERC-8004 reputation increases on-chain
+    |
+    +-- World ID verifies worker is human (ZK proof, anti-sybil)
+    +-- ENS makes agent discoverable ("execution-market.eth")
+    +-- ERC-8004 tracks on-chain reputation (16 networks)
+    |
+Worker completes task --> submits evidence
+    |
+Agent approves --> payment releases (x402, gasless)
+    |
+    +-- Base, Ethereum, Polygon, Arbitrum, Hedera... (multi-chain)
 ```
 
 ---
@@ -36,124 +39,201 @@ Worker's ERC-8004 reputation increases on-chain
 
 ### Track 1: Best Use of AgentKit ($8K)
 
-**AgentBook on-chain verification** — We read the AgentBook contract on Base to verify if a worker's wallet is registered as a verified human:
+**On-chain human verification** via AgentBook contract on Base:
 
 ```python
-# world/agentkit/agentbook.py
-async def lookup_human(wallet: str) -> WorldHumanResult:
-    """Check if wallet is registered in World AgentBook on Base."""
-    # JSON-RPC call to AgentBook contract — free, no gas
-    result = await _call_contract("lookupHuman", [wallet])
-    return WorldHumanResult(
-        human_id=result,
-        is_verified=result != 0,
-    )
+# world/agentkit/agentbook.py — zero external dependencies
+result = await lookup_human("0xWorkerWallet...")
+# result.is_human = True, result.human_id = 42
 ```
 
-**x402 Gateway** — A Hono server using the real `@worldcoin/agentkit` SDK. Verified humans get free API access; unverified bots must pay:
+Plus an **x402 gateway** — verified humans get free API access, bots pay per request.
 
-```
-GET /api/v1/verified-tasks
-  → Human (AgentBook verified): 200 OK (free)
-  → Bot (not verified): 402 Payment Required ($0.001/request)
-```
-
-**Files**: `world/agentkit/`
+**Files**: `world/agentkit/` | **Tests**: 12 passing
 
 ### Track 2: Best Use of World ID 4.0 ($8K)
 
-**This product BREAKS without World ID.**
+**This product BREAKS without World ID.** Without it, bots steal bounties. With it:
 
-Without it, any bot can create a wallet, register as a worker, apply to tasks, submit AI-generated fake evidence, and steal bounties. World ID 4.0 makes this impossible:
+1. **RP Signing** — secp256k1 signature per v4 spec
+2. **Cloud API v4** — ZK proof verification
+3. **Anti-Sybil** — one human = one account (nullifier UNIQUE constraint)
+4. **Enforcement** — tasks >= $5 require Orb verification or HTTP 403
 
-1. **RP Signing** (backend) — secp256k1 signature per v4 spec for IDKit initialization
-2. **Cloud API v4** (backend) — ZK proof verification via `developer.world.org/api/v4/verify/{rp_id}`
-3. **Anti-Sybil** — Deterministic nullifier: `f(person, app_id, action) = same_nullifier`. One human = one verified account, regardless of wallets.
-4. **Enforcement** — Tasks with bounty >= $5 **require Orb verification**. Without it: HTTP 403.
+**Files**: `world/worldid/` | **Tests**: 10 passing
+
+> **[Detailed Guide for Judges](docs/WORLD_JUDGES_GUIDE.md)** — FAQ, demo commands, crypto details, demo script for booth
+
+---
+
+## Partner 2: Hedera ($15K) — AI & Agentic Payments
+
+### What We Built
+
+- **ERC-8004 Identity on Hedera** — Agent #2106 registered on Hedera testnet (gasless via Facilitator)
+- **Agentic Payments** — Hedera SDK payment demo on testnet (HBAR transfers)
+- **Cross-Chain Architecture** — x402 escrow on 9 EVM chains, extending to Hedera
+
+### Why Hedera
 
 ```
-Worker opens dashboard → clicks "Verify with World ID"
-    ↓
-IDKit v4 widget opens → World App scans QR → ZK proof generated
-    ↓
-Backend verifies proof via Cloud API v4
-    ↓
-Nullifier stored (UNIQUE constraint) → anti-sybil enforced
-    ↓
-Worker can now apply to high-value tasks
+Today (Production):                Adding Hedera:
+
+  Agent --> x402 Escrow             Agent --> Hedera SDK
+         |                                   |
+  9 EVM chains + Solana             Hedera Testnet (HBAR/USDC)
+         |                                   |
+  ERC-8004 on 16 networks          ERC-8004 on Hedera
 ```
 
-**Files**: `world/worldid/`
+Hedera's fast finality (3-5s) and low fees ($0.0001) make it ideal for micro-task payments.
+
+**Files**: `hedera/` | **Contracts**: ERC-8004 Identity `0x8004A818...` on Hedera testnet
+
+> **[Detailed Integration Plan](docs/HEDERA_INTEGRATION.md)** — architecture, FAQ, talking points for booth
+
+---
+
+## Partner 3: ENS ($10K) — Agent Identity & Discovery
+
+### What We Built
+
+- **Agent naming**: `execution-market.eth` resolves to Agent #2106's address
+- **On-chain metadata**: ENS text records store `agentId`, `worldIdVerified`, `role`, `reputation`
+- **Worker subnames**: `alice.execution.eth`, `bob.execution.eth` — discoverable fleet
+
+### Why ENS
+
+```
+Without ENS:                        With ENS:
+
+  "Find Agent #2106"                 "Find execution-market.eth"
+  --> Must know our API URL          --> Any ENS client resolves it
+  --> Locked in our database         --> Metadata on-chain, permanent
+  --> Zero cross-protocol use        --> Other protocols can discover us
+```
+
+ENS turns AI agents from opaque wallet addresses into **human-readable, cross-protocol discoverable entities**.
+
+**Files**: `ens/` | **Network**: Sepolia testnet (free)
+
+> **[Detailed Integration Plan](docs/ENS_INTEGRATION.md)** — architecture, FAQ, text records schema
 
 ---
 
 ## Architecture
 
 ```mermaid
-sequenceDiagram
-    participant W as Worker (Human)
-    participant D as Dashboard
-    participant B as Backend (FastAPI)
-    participant WA as World App
-    participant CA as Cloud API v4
-    participant AB as AgentBook (Base)
+graph TB
+    subgraph "AI Agent (Publisher)"
+        A[AI Agent #2106]
+    end
 
-    W->>D: Click "Verify with World ID"
-    D->>B: GET /world-id/rp-signature
-    B-->>D: {nonce, signature, rp_id}
-    D->>WA: Open IDKit (orbLegacy preset)
-    WA-->>D: ZK proof + nullifier
-    D->>B: POST /world-id/verify {responses[]}
-    B->>CA: POST /v4/verify/{rp_id}
-    CA-->>B: {success: true, nullifier}
-    B-->>D: Verified!
+    subgraph "Identity Layer"
+        W[World ID 4.0<br/>ZK Humanity Proof]
+        E[ENS<br/>execution-market.eth]
+        I[ERC-8004<br/>On-chain Identity]
+    end
 
-    Note over B: Also checks AgentBook:
-    B->>AB: lookupHuman(wallet)
-    AB-->>B: humanId (>0 = verified)
+    subgraph "Payment Layer"
+        X[x402 Escrow<br/>9 EVM Chains]
+        H[Hedera SDK<br/>HBAR/USDC]
+    end
+
+    subgraph "Execution Layer"
+        M[Execution Market<br/>execution.market]
+        WK[Workers<br/>Verified Humans]
+    end
+
+    A -->|publishes task| M
+    WK -->|applies| M
+    M -->|verify humanity| W
+    M -->|resolve name| E
+    M -->|check identity| I
+    M -->|lock escrow| X
+    M -->|pay on Hedera| H
+    X -->|release to worker| WK
+    H -->|transfer to worker| WK
+```
+
+### Data Flow (Full Lifecycle)
+
+```
+1. Agent publishes task with $10 bounty
+   --> x402: agent signs EIP-3009 pre-auth (funds stay in wallet)
+
+2. Worker applies to task
+   --> World ID: Orb verification required for $5+ tasks
+   --> AgentBook: on-chain human check (badge)
+   --> ERC-8004: identity + reputation lookup
+   --> ENS: worker discoverable as alice.execution.eth
+
+3. Agent assigns worker
+   --> x402: escrow locks on-chain (Facilitator pays gas)
+
+4. Worker completes task, submits evidence
+   --> PHOTINT: AI verification of evidence (photos, GPS, EXIF)
+
+5. Agent approves
+   --> x402: release 87% to worker, 13% fee to treasury
+   --> ERC-8004: bidirectional reputation update
+   --> ENS: text records updated (tasks completed, rating)
+
+6. Cross-chain: Same flow works on Base, Ethereum, Polygon,
+   Arbitrum, Avalanche, Optimism, Celo, Monad, SKALE, Hedera
 ```
 
 ---
 
 ## How to Run
 
-### World ID Backend (Python)
+### World (Python + TypeScript)
 
 ```bash
-cd world
-pip install -r requirements.txt
+# Backend: RP signing + AgentBook lookup
+cd world && pip install -r requirements.txt
 python -c "from worldid.client import sign_request; print(sign_request())"
+
+# Gateway: x402 + AgentKit
+cd world/agentkit && npm install && npx tsx gateway-server.ts
+
+# Tests: 22 cases
+cd world && pytest tests/ -v
 ```
 
-### AgentKit Gateway (TypeScript)
+### Hedera (Python)
 
 ```bash
-cd world/agentkit
-npm install
-npx tsx gateway-server.ts
-# → http://localhost:4021/api/v1/verified-tasks
+cd hedera && pip install -r requirements.txt
+python demo.py
+# --> Creates testnet account, executes HBAR transfer, verifies on HashScan
 ```
 
-### Tests
+### ENS (Python)
 
 ```bash
-cd world
-pytest tests/ -v  # 22 tests
+cd ens && pip install -r requirements.txt
+python demo.py
+# --> Resolves execution-market.eth, reads text records, checks subnames
 ```
 
 ---
 
 ## Production Deployment
 
-This is not a prototype. Execution Market is **live in production**:
+**This is not a prototype.** Execution Market is live with real USDC payments:
 
 | URL | Service |
 |-----|---------|
 | [execution.market](https://execution.market) | Dashboard (React SPA) |
-| [api.execution.market/docs](https://api.execution.market/docs) | Swagger API docs |
+| [api.execution.market/docs](https://api.execution.market/docs) | Swagger API docs (interactive) |
 | [api.execution.market/api/v1/health](https://api.execution.market/api/v1/health) | Health check |
+| [mcp.execution.market/mcp/](https://mcp.execution.market/mcp/) | MCP transport (for AI agents) |
 
-**On-chain**: Agent #2106 on Base ERC-8004 Identity Registry (`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`)
+**On-chain**:
+- ERC-8004 Agent #2106 on Base: [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://basescan.org/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432)
+- AgentBook (World): [`0xE1D1D3526A6FAa37eb36bD10B933C1b77f4561a4`](https://basescan.org/address/0xE1D1D3526A6FAa37eb36bD10B933C1b77f4561a4)
+- x402r Escrow on 9 EVM chains (see [source repo](https://github.com/UltravioletaDAO/execution-market))
 
 ---
 
@@ -164,14 +244,15 @@ This project used **Claude Code** (Anthropic) for:
 - Test writing and debugging
 - Documentation drafting
 
-All architectural decisions, cryptographic design choices (RP signing, nullifier anti-sybil), production deployment, and business logic were made by the human team.
+All architectural decisions, cryptographic design (RP signing, nullifier anti-sybil), production deployment, business logic, and partner integration strategy were made by the human team.
 
 ---
 
 ## Team
 
-- **Ultravioleta DAO** — [ultravioletadao.xyz](https://ultravioletadao.xyz)
-- Built at ETHGlobal Cannes 2026
+**Ultravioleta DAO** — [ultravioletadao.xyz](https://ultravioletadao.xyz)
+
+Built at ETHGlobal Cannes 2026
 
 ## License
 
