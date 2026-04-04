@@ -70,26 +70,28 @@ Plus an **x402 gateway** — verified humans get free API access, bots pay per r
 
 ### What We Built
 
-- **ERC-8004 Identity on Hedera** — Agent #2106 registered on Hedera testnet (gasless via Facilitator)
-- **Agentic Payments** — Hedera SDK payment demo on testnet (HBAR transfers)
-- **Cross-Chain Architecture** — x402 escrow on 9 EVM chains, extending to Hedera
+- **Open-Source Facilitator Extension** — Extended the [x402-rs Facilitator](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) to support Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
+- **ERC-8004 Identity + Reputation on Hedera** — Agent #99 registered on Hedera testnet, bidirectional reputation (gasless via Facilitator)
+- **Merit Tip: Reputation-Gated HBAR Payment** — Workers who score > 80 reputation receive 0.01 HBAR direct transfer as merit reward ([TX](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c))
+- **Cross-Chain Golden Flow (6/6 PASS)** — Full lifecycle: escrow on Base, reputation + HBAR tips on Hedera, 5 on-chain TXs across 2 chains
 
 ### Why Hedera
 
 ```
 Today (Production):                Adding Hedera:
 
-  Agent --> x402 Escrow             Agent --> Hedera SDK
+  Agent --> x402 Escrow             Agent --> Facilitator (extended)
          |                                   |
-  9 EVM chains + Solana             Hedera Testnet (HBAR/USDC)
+  9 EVM chains + Solana             Hedera Testnet (ERC-8004 + HBAR tips)
          |                                   |
-  ERC-8004 on 16 networks          ERC-8004 on Hedera
+  ERC-8004 on 16 networks          ERC-8004 + Reputation + Merit Tips
 ```
 
-Hedera's fast finality (3-5s) and low fees ($0.0001) make it ideal for micro-task payments.
+Hedera's fast finality (3-5s) and low fees ($0.0001) make it ideal for agent identity infrastructure and micro-payments. Key finding: USDC on Hedera is HTS native (not ERC-20), so we use direct HBAR transfers for the merit tip feature.
 
 **Files**: `hedera/` | **Contracts**: ERC-8004 Identity `0x8004A818...` on Hedera testnet
 
+> **[Proof of Integration](hedera/PROOF_OF_INTEGRATION.md)** — 5 TX hashes, Golden Flow results, architecture, Facilitator extension details
 > **[Detailed Integration Plan](docs/HEDERA_INTEGRATION.md)** — architecture, FAQ, talking points for booth
 
 ---

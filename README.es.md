@@ -70,27 +70,28 @@ Ademas un **gateway x402** — humanos verificados obtienen acceso gratis al API
 
 ### Que Construimos
 
-- **Identidad ERC-8004 en Hedera** — Agente registrado en Hedera testnet (gasless via Facilitator)
-- **Reputacion On-Chain** — Feedback de reputacion ejecutado on-chain en Hedera
-- **Arquitectura Cross-Chain** — x402 escrow en 9 chains EVM, identidad extendida a Hedera
+- **Extension Open-Source del Facilitator** — Extendimos el [Facilitator x402-rs](https://github.com/UltravioletaDAO/x402-rs) (Rust, 21 blockchains) para soportar Hedera mainnet + testnet ([commit `66d34e6`](https://github.com/UltravioletaDAO/x402-rs/commit/66d34e6c7f805fa26a33757b2cdf5ec3038ecb95))
+- **Identidad ERC-8004 + Reputacion en Hedera** — Agente #99 registrado en Hedera testnet, reputacion bidireccional (gasless via Facilitator)
+- **Merit Tip: Pago HBAR Gatekeado por Reputacion** — Workers con puntaje > 80 reciben 0.01 HBAR como recompensa de merito ([TX](https://hashscan.io/testnet/transaction/0x820ab464bef9e8f1c75f9249abf909748c43cb6a5b60846f00fce908a0edb28c))
+- **Golden Flow Cross-Chain (6/6 PASS)** — Ciclo completo: escrow en Base, reputacion + tips HBAR en Hedera, 5 TXs on-chain en 2 chains
 
 ### Por que Hedera
 
 ```
 Hoy (Produccion):                 Agregando Hedera:
 
-  Agente --> x402 Escrow            Agente --> Facilitator
+  Agente --> x402 Escrow            Agente --> Facilitator (extendido)
          |                                    |
-  9 chains EVM + Solana              Hedera Testnet (ERC-8004)
+  9 chains EVM + Solana              Hedera Testnet (ERC-8004 + tips HBAR)
          |                                    |
-  ERC-8004 en 16 redes              ERC-8004 en Hedera
+  ERC-8004 en 16 redes              ERC-8004 + Reputacion + Merit Tips
 ```
 
-La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) lo hacen ideal para infraestructura de identidad de agentes IA.
+La finalidad rapida de Hedera (3-5s) y fees bajos ($0.0001) lo hacen ideal para infraestructura de identidad de agentes IA y micro-pagos. Hallazgo clave: USDC en Hedera es HTS nativo (no ERC-20), por lo que usamos transferencias directas de HBAR para la feature de merit tip.
 
 **Archivos**: `hedera/` | **Contratos**: ERC-8004 Identity `0x8004A818...` en Hedera testnet
 
-> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — evidencia on-chain, TX hashes, arquitectura
+> **[Prueba de Integracion](hedera/PROOF_OF_INTEGRATION.es.md)** — 5 TX hashes, resultados del Golden Flow, arquitectura, detalles de la extension del Facilitator
 > **[Plan de Integracion](docs/HEDERA_INTEGRATION.md)** — arquitectura, FAQ, talking points para booth
 
 ---
