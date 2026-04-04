@@ -1,8 +1,8 @@
 """
-HBAR Payment Demo on Hedera
+Hedera Chain Utilities
 
-Simple HBAR transfer using web3.py via Hedera's JSON-RPC relay.
-Demonstrates agentic payment capability on Hedera network.
+Balance checks and RPC connectivity verification via Hedera's JSON-RPC relay.
+Used by the demo to verify the Facilitator has HBAR for gas.
 """
 
 import logging
@@ -30,7 +30,8 @@ async def get_balance(address: str) -> dict:
     data = resp.json()
     if "result" in data:
         wei = int(data["result"], 16)
-        hbar = wei / 1e18  # tinybar to HBAR (18 decimals in EVM representation)
+        # Hedera EVM uses 18 decimals (weibars to HBAR)
+        hbar = wei / 1e18
         return {
             "address": address,
             "balance_wei": wei,
