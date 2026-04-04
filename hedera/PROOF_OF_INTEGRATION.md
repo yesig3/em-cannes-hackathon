@@ -5,6 +5,49 @@
 
 ---
 
+## Prize Track: "AI & Agentic Payments on Hedera" ($6,000)
+
+**Track**: [ETHGlobal Cannes 2026 — Hedera](https://ethglobal.com/events/cannes2026/prizes)
+**Prize**: Up to 2 teams at $3,000 each.
+
+### Why Hedera?
+
+Hedera's sub-second finality, predictable fees (<$0.01), and native EVM compatibility make it ideal for **AI agent identity infrastructure**. Execution Market is a live marketplace where AI agents publish bounties for real-world tasks — agents need on-chain identity and reputation to trust each other across chains. Hedera is now the 10th chain where our agents can register identity and build reputation.
+
+### How We Meet the Requirements
+
+| Requirement | How We Meet It |
+|------------|----------------|
+| *"Execute at least one payment, token transfer, or financial operation on Hedera Testnet"* | **Two on-chain operations**: (1) ERC-8004 agent registration = NFT mint (token transfer), (2) reputation feedback = on-chain state write. Both executed via Facilitator, both verifiable on HashScan. |
+| *"Incorporate: Hedera Agent Kit, OpenClaw ACP, x402, A2A, or Hedera SDKs directly"* | **x402 protocol** (our payment stack, 9 chains in production) + **ERC-8004** (explicitly listed as accepted technology: "Trustless Agents"). |
+| *"Public GitHub repository with README"* | [UltravioletaDAO/em-cannes-hackathon](https://github.com/UltravioletaDAO/em-cannes-hackathon) with full README, architecture docs, and this proof document. |
+| *"Demonstration video (<=5 minutes)"* | Demo script produces live output; video will show real-time execution. |
+
+### Why This Demo Is Sufficient
+
+The track description says: *"Real payment flows between agents or between agents and services will be prioritized over theoretical implementations."*
+
+Our demo is **not theoretical**. It executes real on-chain operations:
+
+1. **Agent Registration** (ERC-8004 `registerAgent`) — mints an identity NFT on Hedera testnet. This IS a token transfer. The agent now has an on-chain identity at address `0x8004A818...` on Hedera, discoverable by any other agent.
+
+2. **Reputation Feedback** (ERC-8004 `giveFeedback`) — writes a reputation score to the Reputation Registry on Hedera. This is an on-chain financial operation that creates a verifiable trust signal.
+
+3. **Gasless via Facilitator** — the Ultravioleta Facilitator (production infrastructure serving 21 blockchains) pays HBAR gas. Agents don't need HBAR to operate on Hedera. This is the same model used on 9 other chains in production.
+
+4. **Not a Demo-Only Integration** — this is backed by a **live production marketplace** at [execution.market](https://execution.market) with real USDC payments. Hedera extends the identity layer to a 10th chain. The `HEDERA_8004_NETWORK` toggle switches from testnet to mainnet with zero code changes.
+
+### Accepted Technologies We Use
+
+| Technology | Status | How We Use It |
+|-----------|--------|---------------|
+| **ERC-8004** (Trustless Agents) | Listed by Hedera as accepted | On-chain agent identity + reputation on Hedera testnet |
+| **x402** (Payment Standard) | Listed by Hedera as accepted | Production payment protocol on 9 EVM chains (gasless escrow) |
+| **Hedera JSON-RPC Relay** | Via Hashio | Balance checks, chain verification, contract reads |
+| **Facilitator** (Infrastructure) | Production (21 blockchains) | Gasless operations — pays HBAR gas for all on-chain TXs |
+
+---
+
 ## Test Results Summary
 
 | Step | Operation | Result | On-Chain |
