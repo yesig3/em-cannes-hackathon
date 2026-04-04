@@ -1,0 +1,23 @@
+{
+  "name": "em-agentkit-gateway",
+  "version": "1.0.0",
+  "description": "x402 + AgentKit gateway — verified humans free, bots pay",
+  "type": "module",
+  "scripts": {
+    "start": "tsx gateway-server.ts",
+    "dev": "tsx watch gateway-server.ts"
+  },
+  "dependencies": {
+    "@worldcoin/agentkit": "^0.1.6",
+    "@worldcoin/agentkit-core": "^0.1.6",
+    "@x402/core": "^0.1.0",
+    "@x402/evm": "^0.1.0",
+    "@x402/hono": "^0.1.0",
+    "hono": "^4.0.0",
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
