@@ -1,0 +1,21 @@
+{
+  "name": "em-cannes-videos",
+  "scripts": {
+    "start": "npx remotion studio",
+    "build:world": "npx remotion render src/index.tsx WorldDemo out/world-demo.mp4",
+    "build:hedera": "npx remotion render src/index.tsx HederaDemo out/hedera-demo.mp4",
+    "build:ens": "npx remotion render src/index.tsx ENSDemo out/ens-demo.mp4",
+    "build:all": "npm run build:world && npm run build:hedera && npm run build:ens"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.2"
+  }
+}
