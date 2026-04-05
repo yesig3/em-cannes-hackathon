@@ -6,6 +6,8 @@ Default: testnet (for hackathon demo). Switch to mainnet post-hackathon.
 """
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # ── Network toggle ──────────────────────────────────────────────────────────
 # "testnet" (default, hackathon) or "mainnet" (production)

@@ -31,6 +31,9 @@ from datetime import datetime, timezone
 from dataclasses import dataclass
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import httpx
 
 from config import (
