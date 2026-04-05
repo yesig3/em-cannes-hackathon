@@ -277,27 +277,24 @@ async def run_golden_flow():
             )
             if reg.get("status_code") == 200 and reg.get("agentId"):
                 HEDERA_AGENT_ID = int(reg["agentId"])
+                tx_hash = reg.get("txHash", "")
                 print(f"  Registered: Agent #{HEDERA_AGENT_ID} on {NETWORK_LABEL}")
-                print(f"  TX: {EXPLORER_URL}/transaction/{reg.get('txHash', '?')}")
+                if tx_hash:
+                    print(f"  TX: {EXPLORER_URL}/transaction/{tx_hash}")
+                else:
+                    print(f"  TX: (hash not returned by Facilitator)")
             else:
                 print(f"  Registration failed: {reg}")
 
-        # Step 2: Also ensure identity on Base (required for task creation)
-        print(f"  Checking identity on Base (for task creation)...")
-        base_id = await signed_request(client, signer, "GET",
-            f"/api/v1/reputation/identity/{signer.address}")
-        if base_id.get("_http_status") == 200 and base_id.get("agent_id"):
-            print(f"  Agent #{base_id.get('agent_id')} on Base: OK")
+        if HEDERA_AGENT_ID:
+            print(f"  Using Hedera Agent #{HEDERA_AGENT_ID} for reputation in Phase 5")
         else:
-            print(f"  Registering on Base...")
-            reg_resp = await signed_request(client, signer, "POST",
-                "/api/v1/reputation/register", {
-                    "network": "base",
-                    "agent_uri": "https://execution.market/agent-card.json",
-                    "recipient": signer.address,
-                })
-            print(f"  Base registration: {reg_resp.get('_http_status')} agent_id={reg_resp.get('agent_id', '?')}")
+            print(f"  WARNING: No Hedera agent ID -- reputation phase will be skipped")
 
+        # Step 2: Create task on Base via EM API
+        # Note: Base identity is handled internally by the EM API via ERC-8128
+        # wallet signing. No separate Base registration needed.
+        print(f"\n  Creating task on Base (${BOUNTY} USDC bounty)...")
         task_resp = await signed_request(client, signer, "POST", "/api/v1/tasks", {
             "title": f"[GOLDEN FLOW HEDERA] Cross-chain demo {result.timestamp}",
             "instructions": "Respond with: golden_flow_hedera_complete",
@@ -316,8 +313,9 @@ async def run_golden_flow():
                 hcs.log_event(hcs_topic, "task_created", {"task_id": result.task_id, "bounty_usd": BOUNTY, "chain": "base"})
             result.phases.append(("Task Creation (Base)", "PASS"))
         elif "identity_required" in str(task_resp.get("detail", "")):
-            # Identity registration may need a moment to propagate
-            print(f"  Waiting for identity propagation...")
+            # ERC-8128 wallet signing auto-registers on Base, but may need
+            # a moment to propagate. Retry once after a short delay.
+            print(f"  Identity propagation delay — retrying in 3s...")
             await asyncio.sleep(3)
             task_resp = await signed_request(client, signer, "POST", "/api/v1/tasks", {
                 "title": f"[GOLDEN FLOW HEDERA] Cross-chain demo {result.timestamp}",
