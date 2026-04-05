@@ -521,17 +521,19 @@ async def run_golden_flow():
             nonce_resp = await _json_rpc("eth_getTransactionCount", [agent_acct.address, "latest"])
             nonce = int(nonce_resp, 16)
 
-            # Build legacy transaction (Hedera JSON-RPC relay)
-            # Hedera requires higher gas than EVM — 400k gas + 1200 gwei minimum
-            tip_wei = int(TIP_AMOUNT_HBAR * 1e18)  # HBAR to weibars (tinybar * 1e10)
+            # Build EIP-1559 transaction (Hedera JSON-RPC relay)
+            # Hedera relay requires high gas for simple transfers
+            tip_wei = int(TIP_AMOUNT_HBAR * 1e18)  # HBAR to weibars
             tx = {
                 "nonce": nonce,
-                "gasPrice": 1_200_000_000_000,  # 1200 gwei (Hedera relay minimum)
-                "gas": 400_000,  # Hedera needs more gas than EVM for simple transfers
-                "to": bytes.fromhex(WORKER_WALLET[2:]),
+                "maxFeePerGas": 2_000_000_000_000,  # 2000 gwei
+                "maxPriorityFeePerGas": 1_200_000_000_000,  # 1200 gwei
+                "gas": 800_000,  # Hedera relay needs high gas limit
+                "to": WORKER_WALLET,
                 "value": tip_wei,
                 "data": b"",
                 "chainId": CHAIN_ID,
+                "type": 2,  # EIP-1559
             }
 
             signed = agent_acct.sign_transaction(tx)
@@ -541,14 +543,32 @@ async def run_golden_flow():
                 raw = "0x" + raw
 
             tx_hash_resp = await _json_rpc("eth_sendRawTransaction", [raw])
-            result.merit_tip_tx = tx_hash_resp
-            result.merit_tip_hbar = TIP_AMOUNT_HBAR
 
-            print(f"  PASS: Merit tip sent!")
-            print(f"  TX: {EXPLORER_URL}/transaction/{result.merit_tip_tx}")
-            if hcs and hcs_topic:
-                hcs.log_event(hcs_topic, "merit_tip_sent", {"amount_hbar": TIP_AMOUNT_HBAR, "tx": result.merit_tip_tx, "worker": WORKER_WALLET})
-            result.phases.append(("Merit Tip (Hedera HBAR)", "PASS"))
+            # Wait for receipt to verify TX actually succeeded on-chain
+            print(f"  TX submitted: {tx_hash_resp[:18]}... waiting for receipt...")
+            receipt = None
+            for _attempt in range(15):
+                await asyncio.sleep(3)
+                try:
+                    receipt = await _json_rpc("eth_getTransactionReceipt", [tx_hash_resp])
+                    if receipt:
+                        break
+                except Exception:
+                    pass
+
+            if receipt and receipt.get("status") == "0x1":
+                result.merit_tip_tx = tx_hash_resp
+                result.merit_tip_hbar = TIP_AMOUNT_HBAR
+                print(f"  PASS: Merit tip confirmed on-chain!")
+                print(f"  TX: {EXPLORER_URL}/transaction/{result.merit_tip_tx}")
+                if hcs and hcs_topic:
+                    hcs.log_event(hcs_topic, "merit_tip_sent", {"amount_hbar": TIP_AMOUNT_HBAR, "tx": result.merit_tip_tx, "worker": WORKER_WALLET})
+                result.phases.append(("Merit Tip (Hedera HBAR)", "PASS"))
+            else:
+                status = receipt.get("status", "?") if receipt else "no receipt"
+                print(f"  FAIL: TX submitted but failed on-chain (status={status})")
+                print(f"  TX: {EXPLORER_URL}/transaction/{tx_hash_resp}")
+                result.phases.append(("Merit Tip (Hedera HBAR)", f"FAIL: on-chain status={status}"))
 
         except Exception as e:
             print(f"  FAIL: Merit tip error: {e}")
