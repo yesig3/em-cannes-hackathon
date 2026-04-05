@@ -73,7 +73,7 @@ if WORKER_KEY and not WORKER_WALLET:
     WORKER_WALLET = Account.from_key(WORKER_KEY).address
 
 BOUNTY = float(os.environ.get("EM_TEST_BOUNTY", "0.10"))
-HEDERA_AGENT_ID = 99  # Registered in previous demo
+HEDERA_AGENT_ID: Optional[int] = None  # Discovered dynamically from Hedera
 BASE_EXPLORER = "https://basescan.org"
 
 
@@ -255,26 +255,48 @@ async def run_golden_flow():
 
         result.phases.append(("Connectivity", "PASS"))
 
-        # ── Phase 2: Create Task ────────────────────────────────
+        # ── Phase 2: Identity + Create Task ────────────────────
         print("\n" + "=" * 60)
-        print("  Phase 2: Create Task on Base")
+        print("  Phase 2: Identity (Hedera) + Create Task (Base)")
         print("=" * 60)
 
-        # Ensure agent has ERC-8004 identity (gasless auto-registration)
-        print(f"  Checking agent identity...")
-        id_check = await signed_request(client, signer, "GET",
+        global HEDERA_AGENT_ID
+
+        # Step 1: Check if agent already has ERC-8004 identity on HEDERA
+        print(f"  Checking identity on {NETWORK_LABEL}...")
+        hedera_id = await get_identity_by_owner(signer.address)
+        if hedera_id.get("found") and hedera_id.get("agentId"):
+            HEDERA_AGENT_ID = int(hedera_id["agentId"])
+            print(f"  Agent #{HEDERA_AGENT_ID} on {NETWORK_LABEL}: FOUND")
+        else:
+            # Register on Hedera (gasless via Facilitator)
+            print(f"  No identity found. Registering on {NETWORK_LABEL}...")
+            reg = await register_agent(
+                recipient=signer.address,
+                agent_uri="https://execution.market/agent-card.json",
+            )
+            if reg.get("status_code") == 200 and reg.get("agentId"):
+                HEDERA_AGENT_ID = int(reg["agentId"])
+                print(f"  Registered: Agent #{HEDERA_AGENT_ID} on {NETWORK_LABEL}")
+                print(f"  TX: {EXPLORER_URL}/transaction/{reg.get('txHash', '?')}")
+            else:
+                print(f"  Registration failed: {reg}")
+
+        # Step 2: Also ensure identity on Base (required for task creation)
+        print(f"  Checking identity on Base (for task creation)...")
+        base_id = await signed_request(client, signer, "GET",
             f"/api/v1/reputation/identity/{signer.address}")
-        if id_check.get("_http_status") != 200 or not id_check.get("agent_id"):
-            print(f"  Registering agent identity on Base...")
+        if base_id.get("_http_status") == 200 and base_id.get("agent_id"):
+            print(f"  Agent #{base_id.get('agent_id')} on Base: OK")
+        else:
+            print(f"  Registering on Base...")
             reg_resp = await signed_request(client, signer, "POST",
                 "/api/v1/reputation/register", {
                     "network": "base",
                     "agent_uri": "https://execution.market/agent-card.json",
                     "recipient": signer.address,
                 })
-            print(f"  Registration: {reg_resp.get('_http_status')} agent_id={reg_resp.get('agent_id', '?')}")
-        else:
-            print(f"  Agent #{id_check.get('agent_id')} on Base: OK")
+            print(f"  Base registration: {reg_resp.get('_http_status')} agent_id={reg_resp.get('agent_id', '?')}")
 
         task_resp = await signed_request(client, signer, "POST", "/api/v1/tasks", {
             "title": f"[GOLDEN FLOW HEDERA] Cross-chain demo {result.timestamp}",
@@ -426,42 +448,57 @@ async def run_golden_flow():
     print("  Phase 5: Reputation on Hedera")
     print("=" * 60)
 
-    # Ensure agent exists on Hedera
-    identity = await get_identity(HEDERA_AGENT_ID)
-    if identity.get("found"):
-        print(f"  Agent #{HEDERA_AGENT_ID} on Hedera: CONFIRMED")
+    if not HEDERA_AGENT_ID:
+        print("  SKIP: No Hedera agent ID (identity registration failed)")
+        result.phases.append(("Reputation (Hedera)", "SKIP"))
+    else:
+        # Verify agent exists on Hedera
+        identity = await get_identity(HEDERA_AGENT_ID)
+        if identity.get("found"):
+            print(f"  Agent #{HEDERA_AGENT_ID} on {NETWORK_LABEL}: CONFIRMED")
+            owner = identity.get("owner", "?")
+            print(f"  Owner: {owner}")
+        else:
+            print(f"  WARN: Agent #{HEDERA_AGENT_ID} not found on {NETWORK_LABEL}")
 
-    # Agent rates worker
-    fb1 = await submit_feedback(
-        agent_id=HEDERA_AGENT_ID, value=90,
-        tag1="task_completion", tag2="golden_flow_hedera",
-    )
-    result.agent_rates_worker_tx = fb1.get("transaction", fb1.get("txHash", ""))
-    if result.agent_rates_worker_tx:
-        print(f"  Agent->Worker: PASS")
-        print(f"  TX: {EXPLORER_URL}/transaction/{result.agent_rates_worker_tx}")
-        if hcs and hcs_topic:
-            hcs.log_event(hcs_topic, "reputation_agent_to_worker", {"agent_id": HEDERA_AGENT_ID, "score": 90, "tx": result.agent_rates_worker_tx})
+        # Agent rates worker
+        print(f"  Submitting agent->worker feedback (score=90)...")
+        fb1 = await submit_feedback(
+            agent_id=HEDERA_AGENT_ID, value=90,
+            tag1="task_completion", tag2="golden_flow_hedera",
+        )
+        result.agent_rates_worker_tx = fb1.get("transaction", fb1.get("txHash", ""))
+        if result.agent_rates_worker_tx:
+            print(f"  Agent->Worker: PASS")
+            print(f"  TX: {EXPLORER_URL}/transaction/{result.agent_rates_worker_tx}")
+            if hcs and hcs_topic:
+                hcs.log_event(hcs_topic, "reputation_agent_to_worker", {"agent_id": HEDERA_AGENT_ID, "score": 90, "tx": result.agent_rates_worker_tx})
+        else:
+            print(f"  Agent->Worker: FAIL — {fb1}")
 
-    # Worker rates agent
-    fb2 = await submit_feedback(
-        agent_id=HEDERA_AGENT_ID, value=85,
-        tag1="agent_rating", tag2="golden_flow_hedera",
-    )
-    result.worker_rates_agent_tx = fb2.get("transaction", fb2.get("txHash", ""))
-    if result.worker_rates_agent_tx:
-        print(f"  Worker->Agent: PASS")
-        print(f"  TX: {EXPLORER_URL}/transaction/{result.worker_rates_agent_tx}")
-        if hcs and hcs_topic:
-            hcs.log_event(hcs_topic, "reputation_worker_to_agent", {"agent_id": HEDERA_AGENT_ID, "score": 85, "tx": result.worker_rates_agent_tx})
+        # Worker rates agent
+        print(f"  Submitting worker->agent feedback (score=85)...")
+        fb2 = await submit_feedback(
+            agent_id=HEDERA_AGENT_ID, value=85,
+            tag1="agent_rating", tag2="golden_flow_hedera",
+        )
+        result.worker_rates_agent_tx = fb2.get("transaction", fb2.get("txHash", ""))
+        if result.worker_rates_agent_tx:
+            print(f"  Worker->Agent: PASS")
+            print(f"  TX: {EXPLORER_URL}/transaction/{result.worker_rates_agent_tx}")
+            if hcs and hcs_topic:
+                hcs.log_event(hcs_topic, "reputation_worker_to_agent", {"agent_id": HEDERA_AGENT_ID, "score": 85, "tx": result.worker_rates_agent_tx})
+        else:
+            print(f"  Worker->Agent: FAIL — {fb2}")
 
-    rep = await get_reputation(HEDERA_AGENT_ID, include_feedback=True)
-    summary = rep.get("summary", {})
-    result.rep_count = summary.get("count", 0)
-    result.rep_avg = summary.get("summaryValue", 0)
-    print(f"  Reputation: count={result.rep_count}, avg={result.rep_avg}")
+        # Query final reputation
+        rep = await get_reputation(HEDERA_AGENT_ID, include_feedback=True)
+        summary = rep.get("summary", {})
+        result.rep_count = summary.get("count", 0)
+        result.rep_avg = summary.get("summaryValue", 0)
+        print(f"  Reputation: count={result.rep_count}, avg={result.rep_avg}")
 
-    result.phases.append(("Reputation (Hedera)", "PASS"))
+        result.phases.append(("Reputation (Hedera)", "PASS"))
 
     # ── Phase 5b: Merit Tip (reputation-gated HBAR payment) ──
     # Gate the tip by ACTUAL on-chain reputation (read from Hedera chain),
