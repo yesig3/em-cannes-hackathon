@@ -1,42 +1,53 @@
 # Golden Flow Hedera Report -- Cross-Chain E2E Test
 
-> **Date**: 2026-04-04 20:42 UTC | **Result**: **PASS (7/7)**
-> **Payment**: Base Mainnet | **Reputation**: Hedera Testnet | **Facilitator**: https://facilitator.ultravioletadao.xyz
+> **Date**: 2026-04-05 05:37 UTC
+> **Payment Chain**: Base Mainnet (chain 8453)
+> **Reputation Chain**: Hedera Testnet (chain 296)
+> **Facilitator**: https://facilitator.ultravioletadao.xyz
+> **Result**: **PASS**
 
 ---
 
-## Summary
+## Executive Summary
 
-Full lifecycle on production: task created, worker applied, evidence submitted, payment released on **Base** (USDC), bidirectional reputation on **Hedera Testnet** (ERC-8004), merit tip (HBAR), HCS event logging. Same task, two chains.
+Full Execution Market lifecycle executed on production:
+task created, worker applied, evidence submitted, payment released on **Base** (USDC),
+then bidirectional reputation posted on **Hedera Testnet** (ERC-8004).
+
+**Key Result**: Same task, two chains -- payment where the money is (Base),
+reputation where the identity lives (Hedera).
 
 ---
 
-## Transaction Summary
+## Cross-Chain Transaction Summary
 
 | Operation | Chain | TX Hash | Explorer |
 |-----------|-------|---------|----------|
-| Escrow Lock | Base (8453) | `0x98fc338221502fb937...` | [BaseScan](https://basescan.org/tx/0x98fc338221502fb937cf9fdfe26248a9a0700580ef4b690b6853c58da3efeb84) |
-| Payment Release | Base (8453) | `0x29f1aea3cbee79996e...` | [BaseScan](https://basescan.org/tx/0x29f1aea3cbee79996eab4c632d1982c0578820556fc348bdb5d1a012c502e95a) |
-| Agent->Worker Rating | Hedera (296) | `0x26464dbd022d6829e1...` | [HashScan](https://hashscan.io/testnet/transaction/0x26464dbd022d6829e107ca3a52b04720b59c5aa9d7f6a7394a3b50948acdb1c6) |
-| Worker->Agent Rating | Hedera (296) | `0x300c402eb1051b8995...` | [HashScan](https://hashscan.io/testnet/transaction/0x300c402eb1051b8995fee783b23b3b74e68863ad3ac7c958ccccfea30cdd658e) |
-| Merit Tip (0.01 HBAR) | Hedera (296) | `0x419d824ca972ddae63...` | [HashScan](https://hashscan.io/testnet/transaction/0x419d824ca972ddae63b6da1597bad2c4c52172fa1339897d1e2a95c36e9a3321) |
+| Escrow Lock | Base (8453) | `0xcb24e514506ec4e8a8...` | [BaseScan](https://basescan.org/tx/0xcb24e514506ec4e8a807278a2726c0ba0a93a60e98de30552891c926aedd35a4) |
+| Payment Release | Base (8453) | `0x5cc420d03316810bbe...` | [BaseScan](https://basescan.org/tx/0x5cc420d03316810bbee5a5e2d519b7bd9670d881f5ad027b724c0d99a7a029d6) |
+| Agent->Worker Rating | Hedera Testnet (296) | `0x25f8703cd37e2554f1...` | [HashScan](https://hashscan.io/testnet/transaction/0x25f8703cd37e2554f1752fc2990bd092cf5d595a9f7071128f22409e7f45045f) |
+| Worker->Agent Rating | Hedera Testnet (296) | `0x03f84c9cdfc281c692...` | [HashScan](https://hashscan.io/testnet/transaction/0x03f84c9cdfc281c692ea028a48460d33226e9798d641850fdbb9dcfd5e20b68a) |
+| Merit Tip (0.01 HBAR) | Hedera Testnet (296) | `0xb6f329b131bcb939d9...` | [HashScan](https://hashscan.io/testnet/transaction/0xb6f329b131bcb939d914acadcf95bf748d068f04beeace7acf130e685b0b409a) |
 
 ---
 
-## Configuration
+## Test Configuration
 
 | Parameter | Value |
 |-----------|-------|
-| Task ID | `d25a38fa-d296-4679-aa5b-f7b945b61a37` |
-| Bounty | $0.03 USDC |
-| Worker Net (87%) | $0.0261 USDC |
-| Hedera Agent ID | #99 |
+| Task ID | `655df2a2-c0b0-4639-9425-9c9c40f1e20c` |
+| Bounty | $0.1 USDC |
+| Worker Net (87%) | $0.0870 USDC |
+| Payment Chain | Base Mainnet (chain 8453) |
+| Reputation Chain | Hedera Testnet (chain 296) |
+| Hedera Agent ID | #100 |
+| Facilitator HBAR | 2094.457516 |
 | Identity Registry | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
 | Reputation Registry | `0x8004B663056A597Dffe9eCcC1965A193B7388713` |
 
 ---
 
-## Flow
+## Flow Diagram
 
 ```mermaid
 sequenceDiagram
@@ -47,7 +58,7 @@ sequenceDiagram
     participant H as Hedera Testnet
 
     Note over A,H: Phases 2-4: Task Lifecycle (Base)
-    A->>EM: Create task ($0.03 bounty)
+    A->>EM: Create task ($0.1 bounty)
     EM->>B: Escrow lock
     A->>EM: Approve submission
     EM->>B: Payment release
@@ -75,19 +86,43 @@ sequenceDiagram
 
 ---
 
-## Post-Test Reputation
+## Reputation After Test
 
-Agent #99 on hedera-testnet: 29 feedback entries, avg score 87. [Verify](https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/99)
+| Metric | Value |
+|--------|-------|
+| Agent #100 | hedera-testnet |
+| Feedback Count | 8 |
+| Average Score | 87 |
+| Verify | [API](https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/100) |
 
 ---
 
-## Reproduce
+## On-Chain Evidence
+
+### Base Mainnet (Payment)
+
+| TX | Explorer |
+|----|----------|
+| Escrow | [0xcb24e514506ec4...](https://basescan.org/tx/0xcb24e514506ec4e8a807278a2726c0ba0a93a60e98de30552891c926aedd35a4) |
+| Payment | [0x5cc420d0331681...](https://basescan.org/tx/0x5cc420d03316810bbee5a5e2d519b7bd9670d881f5ad027b724c0d99a7a029d6) |
+
+### Hedera Testnet (Reputation)
+
+| TX | Explorer |
+|----|----------|
+| Agent->Worker | [0x25f8703cd37e25...](https://hashscan.io/testnet/transaction/0x25f8703cd37e2554f1752fc2990bd092cf5d595a9f7071128f22409e7f45045f) |
+| Worker->Agent | [0x03f84c9cdfc281...](https://hashscan.io/testnet/transaction/0x03f84c9cdfc281c692ea028a48460d33226e9798d641850fdbb9dcfd5e20b68a) |
+
+---
+
+## Reproducibility
 
 ```bash
-# Verify reputation (public):
-curl https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/99
+# Anyone can verify the Hedera reputation:
+curl https://facilitator.ultravioletadao.xyz/reputation/hedera-testnet/100
 
-# Run full flow (requires wallet keys):
-cd hedera && pip install -r requirements.txt
+# Run the full flow (requires wallet keys):
+cd hedera
+pip install -r requirements.txt
 EM_HIRING_AGENT_PRIVATE_KEY=0x... EM_WORKER_PRIVATE_KEY=0x... python golden_flow_hedera.py
 ```

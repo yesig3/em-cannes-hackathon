@@ -521,12 +521,13 @@ async def run_golden_flow():
             nonce_resp = await _json_rpc("eth_getTransactionCount", [agent_acct.address, "latest"])
             nonce = int(nonce_resp, 16)
 
-            # Build legacy transaction (Hedera relay supports legacy format)
-            tip_wei = int(TIP_AMOUNT_HBAR * 1e18)  # HBAR to weibars
+            # Build legacy transaction (Hedera JSON-RPC relay)
+            # Hedera requires higher gas than EVM — 400k gas + 1200 gwei minimum
+            tip_wei = int(TIP_AMOUNT_HBAR * 1e18)  # HBAR to weibars (tinybar * 1e10)
             tx = {
                 "nonce": nonce,
-                "gasPrice": 1_100_000_000_000,  # 1100 gwei (Hedera min is 1020)
-                "gas": 30_000,
+                "gasPrice": 1_200_000_000_000,  # 1200 gwei (Hedera relay minimum)
+                "gas": 400_000,  # Hedera needs more gas than EVM for simple transfers
                 "to": bytes.fromhex(WORKER_WALLET[2:]),
                 "value": tip_wei,
                 "data": b"",
